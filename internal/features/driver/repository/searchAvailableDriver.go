@@ -30,3 +30,17 @@ func SearchAvailableDriver(ctx context.Context, conn *pgx.Conn) (int, error) {
 	}
 	return id, nil
 }
+
+// UnlockDriver sets driver status to available after order completion.
+func UnlockDriver(ctx context.Context, conn *pgx.Conn, driverID int) error {
+	sqlQuery := `
+    UPDATE drivers
+	SET status = true
+    WHERE id = $1
+`
+	_, err := conn.Exec(ctx, sqlQuery, driverID)
+	if err != nil {
+		return fmt.Errorf("fail unlock driver: %w", err)
+	}
+	return nil
+}
