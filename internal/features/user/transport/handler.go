@@ -36,6 +36,6 @@ func RegisterUserHandler(conn *pgx.Conn) func(c *gin.Context) {
 			return
 		}
 
-		c.IndentedJSON(http.StatusCreated, nil) //вернуть успех
+		c.IndentedJSON(http.StatusCreated, nil)
 	}
 }
