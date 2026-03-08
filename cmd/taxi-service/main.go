@@ -30,6 +30,11 @@ func main() {
 	if err != nil {
 		log.Fatal("fail connect to database:", err)
 	}
+	defer func() {
+		if err := conn.Close(ctx); err != nil {
+			log.Println("fail to close connection", err)
+		}
+	}()
 
 	//GIN setup
 	router := gin.Default()

@@ -35,7 +35,6 @@ func RegisterUserHandler(conn *pgx.Conn) func(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "fail to register user"})
 			return
 		}
-
 		c.IndentedJSON(http.StatusCreated, nil)
 	}
 }
