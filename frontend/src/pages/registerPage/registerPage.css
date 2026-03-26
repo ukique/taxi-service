@@ -1,0 +1,105 @@
+.register-layout{
+    display: grid;
+    grid-template-columns: 55fr 45fr;
+    min-height: 100vh;
+}
+
+.registerBandle {
+    background-color: #0a0a0a;
+    background-image:
+            linear-gradient(rgba(255,255,255,0.12) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.12    ) 1px, transparent 1px);
+    background-size: 60px 60px;
+}
+.registerBandle h1{
+    font-family: "Montserrat",sans-serif;
+    color: #FFFFFF;
+    font-size: 5rem;
+    margin-left: 75px;
+    margin-top: 20px;
+}
+.logoWhite{
+    width: 125px;
+    height: auto;
+}
+#h1-outline{
+    font-family: sans-serif;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.25);
+    font-size: 5rem;
+    font-weight: 900;
+}
+
+.registerBandleInfo{
+    font-family: "IBM Plex Sans", sans-serif;
+    font-optical-sizing: auto;
+   color: gray;
+    font-size: 2rem;
+    margin-left: 95px;
+    margin-top: 20px;
+}
+
+.register{
+    margin-top: 150px;
+    margin-left: 200px;
+    display: flex;
+    flex-direction: column;
+}
+.register-text h1{
+    font-family: "Segoe UI", sans-serif;
+}
+.register-text h3{
+    font-family: Roboto,sans-serif;
+    color: gray;
+    font-size: 1rem;
+}
+.register input{
+    width: 325px;
+    height: 25px;
+    margin-top: 5px;
+    font-family: Calibri, sans-serif;
+    border: 0;
+    border-bottom: 1px solid #222222;
+    outline: 0;
+
+}
+.register input::placeholder {
+    color: #6b7280;
+}
+.register-input-text{
+    margin-top: 25px;
+    font-family: Montserrat,sans-serif;
+    font-size: 0.8rem;
+    color: gray;
+}
+.register-button{
+    background-color: black;
+    color: white;
+    font-family: Montserrat, sans-serif;
+    font-size: 1rem;
+    margin-top: 50px;
+    width: 300px;
+    height: 50px;
+    border-radius: 1rem;
+}
+.register-button:active{
+    background-color: #C0C0C0;
+}
+.register-auth-request{
+    color: gray;
+    font-family: Roboto,sans-serif;
+    font-size: 0.9rem;
+    margin-top: 20px;
+    margin-left: 50px;
+}
+.register-auth-request a{
+   text-decoration-color: #0a0a0a;
+    color: #0a0a0a;
+}
+
+.register-error{
+    color: #e53935;
+    font-family: Montserrat, sans-serif;
+    margin-left: 10px;
+    margin-top: 10px;
+}
