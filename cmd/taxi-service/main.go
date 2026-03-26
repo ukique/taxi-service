@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/ukique/taxi-service/internal/core/database"
@@ -38,6 +39,11 @@ func main() {
 
 	//GIN setup
 	router := gin.Default()
+	router.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"http://localhost:5173"},
+		AllowMethods: []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders: []string{"Content-Type"},
+	}))
 	router.POST("/users/register", userTransport.RegisterUserHandler(conn))
 	router.POST("/drivers/register", driverTransport.RegisterDriverHandler(conn))
 	router.POST("/orders", orderTransport.CreateOrderHandler(conn))
