@@ -25,7 +25,7 @@ function Registration() {
             })
             const result = await response.json()
             if (response.ok) {
-                navigate("/")
+                navigate("/users/authentication")
             } else {
                 setError(result.message)
             }
