@@ -25,6 +25,9 @@ func main() {
 	}
 	dataBaseURL := os.Getenv("DATABASE_URL")
 
+	//get SECRET_KEY for JWT
+	secretKey := os.Getenv("SECRET_KEY")
+
 	// create *Conn for database features
 	ctx := context.Background()
 	conn, err := database.CreateConnection(ctx, dataBaseURL)
@@ -45,6 +48,7 @@ func main() {
 		AllowHeaders: []string{"Content-Type"},
 	}))
 	router.POST("/users/register", userTransport.RegisterUserHandler(conn))
+	router.POST("/users/authentication", userTransport.AuthenticationUserHandler(conn, secretKey))
 	router.POST("/drivers/register", driverTransport.RegisterDriverHandler(conn))
 	router.POST("/orders", orderTransport.CreateOrderHandler(conn))
 	router.POST("/orders/complete", orderTransport.CompleteOrderHandler(conn))
