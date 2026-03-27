@@ -1,0 +1,5 @@
+.authentication-layout{
+    display: grid;
+    grid-template-columns: 55fr 45fr;
+    min-height: 100vh;
+}
