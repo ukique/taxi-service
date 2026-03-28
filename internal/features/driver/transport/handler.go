@@ -15,27 +15,22 @@ func RegisterDriverHandler(conn *pgx.Conn) func(c *gin.Context) {
 		var driver models.Driver
 		if err := c.ShouldBindJSON(&driver); err != nil {
 			log.Println("fail to read JSON body:", err)
-			c.JSON(http.StatusBadRequest, gin.H{"error": "fail to read JSON"})
+			c.JSON(http.StatusBadRequest, gin.H{"message": "fail to read JSON"})
 			return
 		}
 		//validating data
 		if driver.Username == "" {
 			log.Println("username can't be empty:")
-			c.JSON(http.StatusBadRequest, gin.H{"error": "username can't be empty"})
-			return
-		}
-		if driver.Password == "" {
-			log.Println("password can't be empty:")
-			c.JSON(http.StatusBadRequest, gin.H{"error": "password can't be empty"})
+			c.JSON(http.StatusBadRequest, gin.H{"message": "username can't be empty"})
 			return
 		}
 
-		if err := repository.RegisterDriver(c.Request.Context(), conn, driver.Username, driver.Password, driver.Email); err != nil {
+		if err := repository.CreateDriver(c.Request.Context(), conn, driver.Username); err != nil {
 			log.Println("fail to register driver:", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "fail to register driver"})
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "fail to register driver"})
 			return
 		}
 
-		c.IndentedJSON(http.StatusCreated, nil)
+		c.JSON(http.StatusCreated, gin.H{"message": "driver created!"})
 	}
 }
