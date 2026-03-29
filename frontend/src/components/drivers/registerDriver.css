@@ -1,0 +1,81 @@
+.add-driver {
+    display: flex;
+    justify-content: end;
+    margin-right: 100px;
+}
+
+.add-driver-button {
+    font-family: "IBM Plex Sans", sans-serif;
+    background-color: #0a0a0a;
+    color: #FFFFFF;
+    width: 125px;
+    height: 40px;
+    font-size: 0.9rem;
+    border-radius: 0.5rem;
+}
+
+.driver-register {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    background-color: #FFFFFF;
+    padding: 1.5rem;
+    border: 1px solid #6b7280;
+    border-radius: 0.8rem;
+    width: 300px;
+}
+
+.driver-register h2 {
+    font-family: "DM Sans", sans-serif;
+
+}
+
+.driver-register p {
+    font-family: "DM Sans", sans-serif;
+    color: #6b7280;
+}
+
+.driver-register input {
+    border-radius: 0.3rem;
+    width: 220px;
+    height: 40px;
+    border: 1px solid #c6cdd8;
+    outline-color: #222222;
+    margin-top: 10px;
+}
+
+.drivers-register-buttons {
+    display: flex;
+    margin-top: 25px;
+    gap: 1rem;
+}
+
+.add-driver-cancel {
+    font-family: Montserrat, sans-serif;
+    background-color: #FFFFFF;
+    color: #222222;
+    width: 100px;
+    height: 35px;
+    border: 1px solid #6b7280;
+    border-radius: 0.5rem;
+
+}
+
+.add-driver-cancel:hover {
+    background-color: #d5d5d5;
+}
+
+.add-driver-save {
+    font-family: Montserrat, sans-serif;
+    background-color: #0a0a0a;
+    color: #FFFFFF;
+    width: 100px;
+    height: 35px;
+    border-radius: 0.5rem;
+}
+
+.add-driver-save:hover {
+    background-color: #222222;
+}
