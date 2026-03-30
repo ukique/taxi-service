@@ -56,6 +56,7 @@ func main() {
 	router.GET("/drivers", driverTransport.AllDriversHandler(conn))
 	router.DELETE("/drivers/:id", driverTransport.DeleteDriverHandler(conn))
 	router.PATCH("/drivers/:id/username", driverTransport.ChangeDriverNameHandler(conn))
+	router.PATCH("/drivers/:id/status", driverTransport.ChangeDriverStatusHandler(conn))
 	//orders
 	router.POST("/orders", orderTransport.CreateOrderHandler(conn))
 	router.POST("/orders/complete", orderTransport.CompleteOrderHandler(conn))
