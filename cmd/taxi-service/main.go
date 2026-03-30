@@ -47,11 +47,20 @@ func main() {
 		AllowMethods: []string{"GET", "POST", "PUT", "DELETE"},
 		AllowHeaders: []string{"Content-Type"},
 	}))
+	//users
 	router.POST("/users/register", userTransport.RegisterUserHandler(conn))
 	router.POST("/users/authentication", userTransport.AuthenticationUserHandler(conn, secretKey))
+
+	//drivers
 	router.POST("/drivers/register", driverTransport.RegisterDriverHandler(conn))
+	router.GET("/drivers", driverTransport.AllDriversHandler(conn))
+	router.DELETE("/drivers/:id", driverTransport.DeleteDriverHandler(conn))
+	router.PATCH("/drivers/:id/username", driverTransport.ChangeDriverNameHandler(conn))
+	router.PATCH("/drivers/:id/status", driverTransport.ChangeDriverStatusHandler(conn))
+	//orders
 	router.POST("/orders", orderTransport.CreateOrderHandler(conn))
 	router.POST("/orders/complete", orderTransport.CompleteOrderHandler(conn))
+
 	if err := router.Run(":8080"); err != nil {
 		log.Fatal("fail run server on port 8080:", err)
 	}
