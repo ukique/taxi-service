@@ -1,0 +1,17 @@
+.drivers-page-main{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 135px;
+    padding-left: 50px;
+}
+.drivers-page{
+}
+.drivers-page h1{
+    font-family: "DM Sans", sans-serif;
+}
+.drivers-page h4{
+    color: #6b7280;
+    margin-left: 50px;
+    font-family: Montserrat, sans-serif;
+}
