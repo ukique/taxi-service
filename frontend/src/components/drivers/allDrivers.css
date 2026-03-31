@@ -1,0 +1,70 @@
+.drivers-table{
+    margin-left: 100px;
+    block-size: 50px;
+}
+.drivers-table table, th, td {
+    border-style: solid;
+    border-color: #c6c6c6;
+    border-collapse: collapse;
+    background-color: #f8f6f6;
+}
+
+.drivers-table table{
+    margin-top: 20px;
+    font-family: "DM Sans",sans-serif;
+    width: 40%;
+}
+.drivers-table th{
+    padding: 10px;
+}
+.drivers-table td{
+    padding: 10px;
+}
+.drivers-input{
+    margin-top: 50px;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+.drivers-input svg{
+    position: absolute;
+    left: 10px;
+    pointer-events: none;
+}
+.drivers-input input{
+    background-color: #333333;
+    color: #FFFFFF;
+    font-family: "DM Sans",sans-serif;
+    border-radius: 0.4rem;
+    width: 400px;
+    height: 30px;
+    padding-left: 34px;
+}
+
+.drivers-data-buttons{
+    margin-left: 64px;
+    display: flex;
+    gap: 3rem;
+}
+.drivers-data-buttons button{
+    background-color: #333333;
+    color: #FFFFFF;
+    font-family: "DM Sans", sans-serif;
+    width: 150px;
+    height: 40px;
+    border-radius: 0.5rem;
+}
+.drivers-data-buttons button:hover {
+    background-color: #515151;
+    color: #FFFFFF;
+}
+.status-option {
+    opacity: 0.5;
+    margin-left: 1rem;
+}
+.status-option.active {
+    opacity: 1;
+    font-weight: bold;
+    color: #6b7280;
+    border: 2px solid #6b7280;
+}

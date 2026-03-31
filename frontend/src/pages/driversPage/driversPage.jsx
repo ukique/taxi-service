@@ -1,6 +1,7 @@
 import "./driversPage.css"
 import Header from "../../components/header/header.jsx";
 import RegisterDriverButton from "../../components/drivers/registerDriver.jsx";
+import AllDriversTable from "../../components/drivers/allDrivers.jsx";
 
 function Drivers() {
     return (
@@ -13,6 +14,7 @@ function Drivers() {
             </div>
             <h4>Manage driver profiles and monitor status</h4>
             </div>
+            <AllDriversTable/>
         </>
     )
 }
