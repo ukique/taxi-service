@@ -60,7 +60,7 @@ func main() {
 	//orders
 	router.POST("/orders", orderTransport.CreateOrderHandler(conn))
 	//router.GET("/order/:id/history")
-	router.POST("/orders/:id/complete", orderTransport.CompleteOrderHandler(conn))
+	router.GET("/orders/complete", orderTransport.CompleteOrderHandler(conn))
 
 	if err := router.Run(":8080"); err != nil {
 		log.Fatal("fail run server on port 8080:", err)

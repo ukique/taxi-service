@@ -30,7 +30,6 @@ func CreateOrderHandler(conn *pgx.Conn) func(c *gin.Context) {
 	}
 }
 
-// CompleteOrderHandler didn't update!
 func CompleteOrderHandler(conn *pgx.Conn) func(*gin.Context) {
 	return func(c *gin.Context) {
 		var body struct {
@@ -38,30 +37,31 @@ func CompleteOrderHandler(conn *pgx.Conn) func(*gin.Context) {
 		}
 		if err := c.ShouldBindJSON(&body); err != nil {
 			log.Println("fail to read json body:", err)
-			c.JSON(http.StatusBadRequest, gin.H{"error": "fail to read json body"})
+			c.JSON(http.StatusBadRequest, gin.H{"message": "fail to read json body"})
 			return
 		}
+
 		//search driverID from DataBase
 		driverID, err := order.GetDriverIDByOrder(c.Request.Context(), conn, body.OrderID)
 		if err != nil {
 			log.Println("fail to get driverID:", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "fail to get driverID"})
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "fail to get driverID"})
 			return
 		}
 
 		// unlock driver (because we use FOR UPDATE SKIP LOCKED in SearchAvailableDriver func)
 		if err := driver.UnlockDriver(c.Request.Context(), conn, driverID); err != nil {
 			log.Println("fail to unlock driver:", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "fail to unlock driver"})
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "fail to unlock driver"})
 			return
 		}
 
 		//update order status to false (closed)
 		if err := order.UpdateOrder(c.Request.Context(), conn, body.OrderID); err != nil {
 			log.Println("fail to update order:", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "fail to update order"})
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "fail to update order"})
 			return
 		}
-		c.IndentedJSON(http.StatusOK, nil)
+		c.JSON(http.StatusOK, gin.H{"message": "order completed!"})
 	}
 }
