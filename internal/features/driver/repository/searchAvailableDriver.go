@@ -13,10 +13,10 @@ import (
 func SearchAvailableDriver(ctx context.Context, conn *pgx.Conn) (int, error) {
 	sqlQuery := `
     UPDATE drivers
-    SET status = false
+    SET status = 'driving'
     WHERE id = (  
     SELECT id FROM drivers
-    WHERE status = true
+    WHERE status = 'searching'
 	ORDER BY random()
 	LIMIT 1 
 	FOR UPDATE SKIP LOCKED -- Lock driver to avoid duplicate requests in goroutines
@@ -35,7 +35,7 @@ func SearchAvailableDriver(ctx context.Context, conn *pgx.Conn) (int, error) {
 func UnlockDriver(ctx context.Context, conn *pgx.Conn, driverID int) error {
 	sqlQuery := `
     UPDATE drivers
-	SET status = true
+	SET status = 'offline'
     WHERE id = $1
 `
 	_, err := conn.Exec(ctx, sqlQuery, driverID)

@@ -18,18 +18,19 @@ func CreateOrderHandler(conn *pgx.Conn) func(c *gin.Context) {
 		var order models.Order
 		if err := c.ShouldBindJSON(&order); err != nil {
 			log.Println("fail to read JSON body:", err)
-			c.JSON(http.StatusBadRequest, gin.H{"error": "fail to read JSON"})
+			c.JSON(http.StatusBadRequest, gin.H{"message": "incorrect data!"})
 			return
 		}
 		if err := services.CreateOrder(c.Request.Context(), conn, order.UserID); err != nil {
 			log.Println("fail to create Order:", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "fail to create Order"})
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "fail to create Order"})
 			return
 		}
-		c.IndentedJSON(http.StatusCreated, nil)
+		c.JSON(http.StatusCreated, gin.H{"message": "order created!"})
 	}
 }
 
+// CompleteOrderHandler didn't update!
 func CompleteOrderHandler(conn *pgx.Conn) func(*gin.Context) {
 	return func(c *gin.Context) {
 		var body struct {
