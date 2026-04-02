@@ -18,15 +18,15 @@ func CreateOrderHandler(conn *pgx.Conn) func(c *gin.Context) {
 		var order models.Order
 		if err := c.ShouldBindJSON(&order); err != nil {
 			log.Println("fail to read JSON body:", err)
-			c.JSON(http.StatusBadRequest, gin.H{"error": "fail to read JSON"})
+			c.JSON(http.StatusBadRequest, gin.H{"message": "incorrect data!"})
 			return
 		}
 		if err := services.CreateOrder(c.Request.Context(), conn, order.UserID); err != nil {
 			log.Println("fail to create Order:", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "fail to create Order"})
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "fail to create Order"})
 			return
 		}
-		c.IndentedJSON(http.StatusCreated, nil)
+		c.JSON(http.StatusCreated, gin.H{"message": "order created!"})
 	}
 }
 
@@ -37,30 +37,31 @@ func CompleteOrderHandler(conn *pgx.Conn) func(*gin.Context) {
 		}
 		if err := c.ShouldBindJSON(&body); err != nil {
 			log.Println("fail to read json body:", err)
-			c.JSON(http.StatusBadRequest, gin.H{"error": "fail to read json body"})
+			c.JSON(http.StatusBadRequest, gin.H{"message": "fail to read json body"})
 			return
 		}
+
 		//search driverID from DataBase
 		driverID, err := order.GetDriverIDByOrder(c.Request.Context(), conn, body.OrderID)
 		if err != nil {
 			log.Println("fail to get driverID:", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "fail to get driverID"})
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "fail to get driverID"})
 			return
 		}
 
 		// unlock driver (because we use FOR UPDATE SKIP LOCKED in SearchAvailableDriver func)
 		if err := driver.UnlockDriver(c.Request.Context(), conn, driverID); err != nil {
 			log.Println("fail to unlock driver:", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "fail to unlock driver"})
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "fail to unlock driver"})
 			return
 		}
 
 		//update order status to false (closed)
 		if err := order.UpdateOrder(c.Request.Context(), conn, body.OrderID); err != nil {
 			log.Println("fail to update order:", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "fail to update order"})
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "fail to update order"})
 			return
 		}
-		c.IndentedJSON(http.StatusOK, nil)
+		c.JSON(http.StatusOK, gin.H{"message": "order completed!"})
 	}
 }

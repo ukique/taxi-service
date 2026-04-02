@@ -1,9 +1,18 @@
 package models
 
+import "time"
+
 type Order struct {
-	UserID     int     `json:"user_id"`
-	PickupLat  float64 `json:"pickup_lat"`
-	PickupLon  float64 `json:"pickup_lon"`
-	DropoutLat float64 `json:"dropout_lat"`
-	DropoutLon float64 `json:"dropout_lon"`
+	UserID     int         `json:"user_id"`
+	DriverID   int         `json:"driver_id"`
+	Status     OrderStatus `json:"status"`
+	PickUpLat  float64     `json:"pick_up_lat"`
+	PickUpLon  float64     `json:"pick_up_lon"`
+	DropOutLat float64     `json:"drop_out_lat"`
+	DropOutLon float64     `json:"drop_out_lon"`
+	CreatedAt  time.Time   `json:"created_at"`
+	UpdatedAt  time.Time   `json:"updated_at"`
 }
+
+// OrderStatus is a ENUM for orderStatus in Orders Table
+type OrderStatus string
