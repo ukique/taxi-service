@@ -59,6 +59,7 @@ func main() {
 	router.PATCH("/drivers/:id/status", driverTransport.ChangeDriverStatusHandler(conn))
 	//orders
 	router.POST("/orders", orderTransport.CreateOrderHandler(conn))
+	router.GET("/orders", orderTransport.GetAllOrdersHandler(conn))
 	//router.GET("/order/:id/history")
 	router.GET("/orders/complete", orderTransport.CompleteOrderHandler(conn))
 
