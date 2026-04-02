@@ -1,6 +1,7 @@
 import "./ordersPage.css"
 import Header from "../../components/header/header.jsx";
 import CreateOrderButton from "../../components/orders/createOrder.jsx";
+import AllOrdersTable from "../../components/orders/allOrdersTable.jsx";
 
 function Orders() {
     return (
@@ -12,6 +13,7 @@ function Orders() {
                     <CreateOrderButton />
                 </div>
                 <h4>Manage and track all active rides</h4>
+                <AllOrdersTable/>
             </div>
         </>
     )
