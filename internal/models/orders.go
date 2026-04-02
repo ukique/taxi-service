@@ -3,6 +3,7 @@ package models
 import "time"
 
 type Order struct {
+	ID         int         `json:"id"`
 	UserID     int         `json:"user_id"`
 	DriverID   int         `json:"driver_id"`
 	Status     OrderStatus `json:"status"`

@@ -1,0 +1,22 @@
+body{
+    background-color: #f5f5f3;
+}
+.orders{
+
+}
+.orders-main{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 135px;
+    padding-left: 50px;
+}
+.orders-main h1{
+    color: #0a0a0a;
+    font-family: "DM Sans", sans-serif;
+}
+.orders h4{
+    color: #6b7280;
+    margin-left: 50px;
+    font-family: Montserrat, sans-serif;
+}
