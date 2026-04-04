@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/ukique/taxi-service/internal/core/database"
+	"github.com/ukique/taxi-service/internal/core/rabbitmq"
 
 	driverTransport "github.com/ukique/taxi-service/internal/features/driver/transport"
 
@@ -18,27 +19,66 @@ import (
 )
 
 func main() {
-	// get DATABASE_URL from .env
+	// Load .env
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file", err)
+		log.Println("Error loading .env file", err)
+		os.Exit(1)
 	}
+
+	// get DATABASE_URL from .env
 	dataBaseURL := os.Getenv("DATABASE_URL")
 
 	//get SECRET_KEY for JWT
 	secretKey := os.Getenv("SECRET_KEY")
 
+	//get RABBITMQ_URL from .env
+	rabbitmqURL := os.Getenv("RABBITMQ_URL")
+
 	// create *Conn for database features
 	ctx := context.Background()
 	conn, err := database.CreateConnection(ctx, dataBaseURL)
 	if err != nil {
-		log.Fatal("fail connect to database:", err)
+		log.Println("fail connect to database:", err)
+		os.Exit(1)
 	}
 	defer func() {
 		if err := conn.Close(ctx); err != nil {
-			log.Println("fail to close connection", err)
+			log.Println("fail to close database connection:", err)
 		}
 	}()
+
+	// create *amqp.Connection for RabbitMQ features
+	brokerConn, err := rabbitmq.CreateRabbitMQConnection(rabbitmqURL)
+	if err != nil {
+		log.Println("fail to connect to RabbitMQ:", err)
+		os.Exit(1)
+	}
+	defer func() {
+		if err := brokerConn.Close(); err != nil {
+			log.Println("fail to close RabbitMQ connection:", err)
+		}
+	}()
+
+	// create *amqp.Channel (broker channel)
+	brokerChannel, err := rabbitmq.CreateChannel(brokerConn)
+	if err != nil {
+		log.Println("fail to create RabbitMQ channel:", err)
+		os.Exit(1)
+	}
+	defer func() {
+		if err := brokerChannel.Close(); err != nil {
+			log.Println("fail to close RabbitMQ channel:", err)
+			os.Exit(1)
+		}
+	}()
+
+	// create Queue Declare for Orders Coordinates *amqp.Queue (broker queue)
+	_, err = rabbitmq.QueueDeclareOrdersCoordinates(brokerChannel) // when you will use it, change _ to orderCoordinatesQueue
+	if err != nil {
+		log.Println("fail to create Queue Declare Orders Coordinates:", err)
+		os.Exit(1)
+	}
 
 	//GIN setup
 	router := gin.Default()
@@ -60,10 +100,10 @@ func main() {
 	//orders
 	router.POST("/orders", orderTransport.CreateOrderHandler(conn))
 	router.GET("/orders", orderTransport.GetAllOrdersHandler(conn))
-	//router.GET("/order/:id/history")
 	router.GET("/orders/complete", orderTransport.CompleteOrderHandler(conn))
-
+	router.GET("/orders/details/:id")
 	if err := router.Run(":8080"); err != nil {
-		log.Fatal("fail run server on port 8080:", err)
+		log.Println("fail run server on port 8080:", err)
+		os.Exit(1)
 	}
 }
