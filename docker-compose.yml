@@ -1,0 +1,23 @@
+services:
+  db:
+    image: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    container_name: taxi-service-db
+    ports:
+      - "5435:5432"
+    environment:
+      POSTGRES_USER: ukique
+      POSTGRES_PASSWORD: taxi
+      POSTGRES_DB: taxi_service_db
+  broker:
+    image: rabbitmq:4-management
+    container_name: taxi-service-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ukique
+      RABBITMQ_DEFAULT_PASS: taxi
+volumes:
+  postgres_data:
