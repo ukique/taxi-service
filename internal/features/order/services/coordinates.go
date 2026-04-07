@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -15,10 +16,11 @@ import (
 
 // GenerateCoordinates generate random float64 coordinates
 // for example lat = 47.842658, lon = 34.811989
-func GenerateCoordinates() (float64, float64) {
+func GenerateCoordinates() (float64, float64, time.Time) {
 	driverLat := rand.Float64()*180 - 90
 	driverLon := rand.Float64()*360 - 180
-	return driverLat, driverLon
+	generatedTime := time.Now()
+	return driverLat, driverLon, generatedTime
 }
 
 // SendCoordinates sends to the message broker messages of the following structure
@@ -27,7 +29,7 @@ func SendCoordinates(ctx context.Context, conn *pgx.Conn, ch *amqp.Channel, orde
 	for _, order := range orders {
 		//Getting random coordinates
 		var coordinates models.Coordinates
-		coordinates.Lat, coordinates.Lon = GenerateCoordinates()
+		coordinates.Lat, coordinates.Lon, coordinates.GeneratedTime = GenerateCoordinates()
 
 		order.Status = "in_progress"
 		orderStatus := "in_progress"
@@ -41,14 +43,16 @@ func SendCoordinates(ctx context.Context, conn *pgx.Conn, ch *amqp.Channel, orde
 		orderBody := models.OrderCoordinateEvent{
 			DriverID: order.DriverID,
 			Coordinates: models.Coordinates{
-				Lat: coordinates.Lat,
-				Lon: coordinates.Lon,
+				Lat:           coordinates.Lat,
+				Lon:           coordinates.Lon,
+				GeneratedTime: coordinates.GeneratedTime,
 			},
 			Order: models.Order{
 				ID:     order.ID,
 				Status: order.Status,
 			},
 		}
+		//saving driver_locations to db
 		orderData, err := json.Marshal(orderBody)
 		if err != nil {
 			log.Println("fail to marshal orderBody:")
