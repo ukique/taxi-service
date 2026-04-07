@@ -9,8 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/ukique/taxi-service/internal/core/database"
-	"github.com/ukique/taxi-service/internal/core/rabbitmq"
-
 	driverTransport "github.com/ukique/taxi-service/internal/features/driver/transport"
 
 	userTransport "github.com/ukique/taxi-service/internal/features/user/transport"
@@ -32,9 +30,6 @@ func main() {
 	//get SECRET_KEY for JWT
 	secretKey := os.Getenv("SECRET_KEY")
 
-	//get RABBITMQ_URL from .env
-	rabbitmqURL := os.Getenv("RABBITMQ_URL")
-
 	// create *Conn for database features
 	ctx := context.Background()
 	conn, err := database.CreateConnection(ctx, dataBaseURL)
@@ -47,38 +42,6 @@ func main() {
 			log.Println("fail to close database connection:", err)
 		}
 	}()
-
-	// create *amqp.Connection for RabbitMQ features
-	brokerConn, err := rabbitmq.CreateRabbitMQConnection(rabbitmqURL)
-	if err != nil {
-		log.Println("fail to connect to RabbitMQ:", err)
-		os.Exit(1)
-	}
-	defer func() {
-		if err := brokerConn.Close(); err != nil {
-			log.Println("fail to close RabbitMQ connection:", err)
-		}
-	}()
-
-	// create *amqp.Channel (broker channel)
-	brokerChannel, err := rabbitmq.CreateChannel(brokerConn)
-	if err != nil {
-		log.Println("fail to create RabbitMQ channel:", err)
-		os.Exit(1)
-	}
-	defer func() {
-		if err := brokerChannel.Close(); err != nil {
-			log.Println("fail to close RabbitMQ channel:", err)
-			os.Exit(1)
-		}
-	}()
-
-	// create Queue Declare for Orders Coordinates *amqp.Queue (broker queue)
-	_, err = rabbitmq.QueueDeclareOrdersCoordinates(brokerChannel) // when you will use it, change _ to orderCoordinatesQueue
-	if err != nil {
-		log.Println("fail to create Queue Declare Orders Coordinates:", err)
-		os.Exit(1)
-	}
 
 	//GIN setup
 	router := gin.Default()
