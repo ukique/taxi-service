@@ -16,7 +16,7 @@ func CreateOrder(ctx context.Context, conn *pgx.Conn, userID int) error {
 		return fmt.Errorf("fail to find driver: %w", err)
 	}
 
-	const orderStatus = models.OrderStatus("in_progress")
+	const orderStatus = models.OrderStatus("created")
 	pickupLat := rand.Float64()*180 - 90
 	pickupLon := rand.Float64()*360 - 180
 	dropoutLat := rand.Float64()*180 - 90

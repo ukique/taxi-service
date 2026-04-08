@@ -4,17 +4,13 @@ import (
 	"context"
 	"log"
 	"os"
+	"time"
 
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/ukique/taxi-service/internal/core/database"
 	"github.com/ukique/taxi-service/internal/core/rabbitmq"
-	driverTransport "github.com/ukique/taxi-service/internal/features/driver/transport"
-
-	userTransport "github.com/ukique/taxi-service/internal/features/user/transport"
-
-	orderTransport "github.com/ukique/taxi-service/internal/features/order/transport"
+	orderFeatures "github.com/ukique/taxi-service/internal/features/order/repository"
+	"github.com/ukique/taxi-service/internal/features/order/services"
 )
 
 func main() {
@@ -27,9 +23,6 @@ func main() {
 
 	// get DATABASE_URL from .env
 	dataBaseURL := os.Getenv("DATABASE_URL")
-
-	//get SECRET_KEY for JWT
-	secretKey := os.Getenv("SECRET_KEY")
 
 	//get RABBITMQ_URL from .env
 	rabbitmqURL := os.Getenv("RABBITMQ_URL")
@@ -46,7 +39,6 @@ func main() {
 			log.Println("fail to close database connection:", err)
 		}
 	}()
-
 	// create *amqp.Connection for RabbitMQ features
 	brokerConn, err := rabbitmq.CreateRabbitMQConnection(rabbitmqURL)
 	if err != nil {
@@ -79,37 +71,18 @@ func main() {
 		os.Exit(1)
 	}
 
-	go func() {
-		if err := rabbitmq.LocationDatabaseConsumer(ctx, conn, brokerChannel, orderCoordinatesQueue); err != nil {
-			log.Println("consume error:", err)
-			os.Exit(1)
+	for {
+		orders, err := orderFeatures.GetCreatedOrders(ctx, conn)
+		if err != nil {
+			log.Println("fail to get orders:", err)
 		}
-	}()
-
-	//GIN setup
-	router := gin.Default()
-	router.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"http://localhost:5173"},
-		AllowMethods: []string{"GET", "POST", "PATCH", "PUT", "DELETE"},
-		AllowHeaders: []string{"Content-Type"},
-	}))
-	//users
-	router.POST("/users/register", userTransport.RegisterUserHandler(conn))
-	router.POST("/users/authentication", userTransport.AuthenticationUserHandler(conn, secretKey))
-
-	//drivers
-	router.POST("/drivers/register", driverTransport.RegisterDriverHandler(conn))
-	router.GET("/drivers", driverTransport.AllDriversHandler(conn))
-	router.DELETE("/drivers/:id", driverTransport.DeleteDriverHandler(conn))
-	router.PATCH("/drivers/:id/username", driverTransport.ChangeDriverNameHandler(conn))
-	router.PATCH("/drivers/:id/status", driverTransport.ChangeDriverStatusHandler(conn))
-	//orders
-	router.POST("/orders", orderTransport.CreateOrderHandler(conn))
-	router.GET("/orders", orderTransport.GetAllOrdersHandler(conn))
-	router.GET("/orders/complete", orderTransport.CompleteOrderHandler(conn))
-	router.GET("/orders/details/:id")
-	if err := router.Run(":8080"); err != nil {
-		log.Println("fail run server on port 8080:", err)
-		os.Exit(1)
+		//Send coordinate to RabbitMQ
+		for i := 0; i < 50; i++ {
+			err := services.SendCoordinates(ctx, conn, brokerChannel, orderCoordinatesQueue, orders)
+			if err != nil {
+				log.Println("fail to send Coordinates:", err)
+			}
+			time.Sleep(5 * time.Second)
+		}
 	}
 }
