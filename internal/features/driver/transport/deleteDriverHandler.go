@@ -6,11 +6,11 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/ukique/taxi-service/internal/features/driver/repository"
 )
 
-func DeleteDriverHandler(conn *pgx.Conn) func(c *gin.Context) {
+func DeleteDriverHandler(pool *pgxpool.Pool) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 		idInt, err := strconv.Atoi(id)
@@ -20,7 +20,7 @@ func DeleteDriverHandler(conn *pgx.Conn) func(c *gin.Context) {
 			return
 		}
 
-		if err := repository.DeleteDriverByID(c.Request.Context(), conn, idInt); err != nil {
+		if err := repository.DeleteDriverByID(c.Request.Context(), pool, idInt); err != nil {
 			log.Println("fail to delete driver", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "fail to delete driver"})
 			return

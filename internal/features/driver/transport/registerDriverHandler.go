@@ -5,12 +5,12 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/ukique/taxi-service/internal/features/driver/repository"
 	"github.com/ukique/taxi-service/internal/models"
 )
 
-func RegisterDriverHandler(conn *pgx.Conn) func(c *gin.Context) {
+func RegisterDriverHandler(pool *pgxpool.Pool) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		var driver models.Driver
 		if err := c.ShouldBindJSON(&driver); err != nil {
@@ -25,7 +25,7 @@ func RegisterDriverHandler(conn *pgx.Conn) func(c *gin.Context) {
 			return
 		}
 
-		if err := repository.CreateDriver(c.Request.Context(), conn, driver.Username); err != nil {
+		if err := repository.CreateDriver(c.Request.Context(), pool, driver.Username); err != nil {
 			log.Println("fail to register driver:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "fail to register driver"})
 			return

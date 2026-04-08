@@ -6,14 +6,14 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/ukique/taxi-service/internal/core"
 	"github.com/ukique/taxi-service/internal/features/user/repository"
 	"github.com/ukique/taxi-service/internal/models"
 )
 
-func RegisterUserHandler(conn *pgx.Conn) func(c *gin.Context) {
+func RegisterUserHandler(pool *pgxpool.Pool) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		var user models.User
 		if err := c.ShouldBindJSON(&user); err != nil {
@@ -65,7 +65,7 @@ func RegisterUserHandler(conn *pgx.Conn) func(c *gin.Context) {
 		}
 		//duplicated data
 		var pgErr *pgconn.PgError
-		err := repository.RegisterUser(c.Request.Context(), conn, user.Username, user.Password, user.Email)
+		err := repository.RegisterUser(c.Request.Context(), pool, user.Username, user.Password, user.Email)
 		if err != nil {
 			if errors.As(err, &pgErr) && pgErr.Code == "23505" { //23505 is duplicated data pgx error
 				switch pgErr.ConstraintName {

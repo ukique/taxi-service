@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/ukique/taxi-service/internal/features/driver/repository"
 	"github.com/ukique/taxi-service/internal/models"
 )
 
-func CreateOrder(ctx context.Context, conn *pgx.Conn, userID int) error {
-	driverID, err := repository.SearchAvailableDriver(ctx, conn)
+func CreateOrder(ctx context.Context, pool *pgxpool.Pool, userID int) error {
+	driverID, err := repository.SearchAvailableDriver(ctx, pool)
 	if err != nil {
 		return fmt.Errorf("fail to find driver: %w", err)
 	}
@@ -29,10 +29,10 @@ func CreateOrder(ctx context.Context, conn *pgx.Conn, userID int) error {
 `
 	driverStatus := "driving"
 	// unlock driver in db after too (check SearchAvailableDriver func)
-	if err := repository.ChangeDriverStatus(ctx, conn, driverID, driverStatus); err != nil {
+	if err := repository.ChangeDriverStatus(ctx, pool, driverID, driverStatus); err != nil {
 		return fmt.Errorf("fail to change driver status: %w", err)
 	}
-	_, err = conn.Exec(ctx, sqlQuery, userID, driverID, pickupLat, pickupLon, dropoutLat, dropoutLon, orderStatus)
+	_, err = pool.Exec(ctx, sqlQuery, userID, driverID, pickupLat, pickupLon, dropoutLat, dropoutLon, orderStatus)
 	if err != nil {
 		return fmt.Errorf("fail to insert into orders: %w", err)
 	}

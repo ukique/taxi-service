@@ -3,16 +3,16 @@ package repository
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/ukique/taxi-service/internal/models"
 )
 
-func GetCreatedOrders(ctx context.Context, conn *pgx.Conn) ([]models.Order, error) {
+func GetCreatedOrders(ctx context.Context, pool *pgxpool.Pool) ([]models.Order, error) {
 	sqlQuery := `
 	SELECT id, driver_id, status FROM orders WHERE status = 'created'
 `
 	var orders []models.Order
-	rows, err := conn.Query(ctx, sqlQuery)
+	rows, err := pool.Query(ctx, sqlQuery)
 	if err != nil {
 		return []models.Order{}, err
 	}

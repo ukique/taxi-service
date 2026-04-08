@@ -29,16 +29,12 @@ func main() {
 
 	// create *Conn for database features
 	ctx := context.Background()
-	conn, err := database.CreateConnection(ctx, dataBaseURL)
+	pool, err := database.CreateConnection(ctx, dataBaseURL)
 	if err != nil {
 		log.Println("fail connect to database:", err)
 		os.Exit(1)
 	}
-	defer func() {
-		if err := conn.Close(ctx); err != nil {
-			log.Println("fail to close database connection:", err)
-		}
-	}()
+
 	// create *amqp.Connection for RabbitMQ features
 	brokerConn, err := rabbitmq.CreateRabbitMQConnection(rabbitmqURL)
 	if err != nil {
@@ -72,13 +68,13 @@ func main() {
 	}
 
 	for {
-		orders, err := orderFeatures.GetCreatedOrders(ctx, conn)
+		orders, err := orderFeatures.GetCreatedOrders(ctx, pool)
 		if err != nil {
 			log.Println("fail to get orders:", err)
 		}
 		//Send coordinate to RabbitMQ
 		for i := 0; i < 50; i++ {
-			err := services.SendCoordinates(ctx, conn, brokerChannel, orderCoordinatesQueue, orders)
+			err := services.SendCoordinates(ctx, pool, brokerChannel, orderCoordinatesQueue, orders)
 			if err != nil {
 				log.Println("fail to send Coordinates:", err)
 			}

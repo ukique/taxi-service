@@ -7,7 +7,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	amqp "github.com/rabbitmq/amqp091-go"
 	orderFeatures "github.com/ukique/taxi-service/internal/features/order/repository"
 	"github.com/ukique/taxi-service/internal/models"
@@ -24,7 +24,7 @@ func GenerateCoordinates() (float64, float64, time.Time) {
 
 // SendCoordinates sends to the message broker messages of the following structure
 // Example structure you can check in docs/examples/message_broker_structure.md
-func SendCoordinates(ctx context.Context, conn *pgx.Conn, ch *amqp.Channel, orderCoordinatesQueue amqp.Queue, orders []models.Order) error {
+func SendCoordinates(ctx context.Context, pool *pgxpool.Pool, ch *amqp.Channel, orderCoordinatesQueue amqp.Queue, orders []models.Order) error {
 	for _, order := range orders {
 		//Getting random coordinates
 		var coordinates models.Coordinates
@@ -32,7 +32,7 @@ func SendCoordinates(ctx context.Context, conn *pgx.Conn, ch *amqp.Channel, orde
 
 		order.Status = "in_progress"
 		orderStatus := "in_progress"
-		err := orderFeatures.UpdateOrderStatus(ctx, conn, order.ID, orderStatus)
+		err := orderFeatures.UpdateOrderStatus(ctx, pool, order.ID, orderStatus)
 		if err != nil {
 			log.Println("fail to change order status:", err)
 			return err
