@@ -76,15 +76,13 @@ func main() {
 		if err != nil {
 			log.Println("fail to get orders:", err)
 		}
-
 		//Send coordinate to RabbitMQ
 		for i := 0; i < 50; i++ {
-			err = services.SendCoordinates(ctx, conn, brokerChannel, orderCoordinatesQueue, orders)
+			err := services.SendCoordinates(ctx, conn, brokerChannel, orderCoordinatesQueue, orders)
 			if err != nil {
 				log.Println("fail to send Coordinates:", err)
 			}
 			time.Sleep(5 * time.Second)
 		}
-		//
 	}
 }

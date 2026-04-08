@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"math/rand"
 	"time"
@@ -35,7 +34,7 @@ func SendCoordinates(ctx context.Context, conn *pgx.Conn, ch *amqp.Channel, orde
 		orderStatus := "in_progress"
 		err := orderFeatures.UpdateOrderStatus(ctx, conn, order.ID, orderStatus)
 		if err != nil {
-			fmt.Println("fail to change order status:", err)
+			log.Println("fail to change order status:", err)
 			return err
 		}
 
@@ -52,7 +51,7 @@ func SendCoordinates(ctx context.Context, conn *pgx.Conn, ch *amqp.Channel, orde
 				Status: order.Status,
 			},
 		}
-		//saving driver_locations to db
+
 		orderData, err := json.Marshal(orderBody)
 		if err != nil {
 			log.Println("fail to marshal orderBody:")
