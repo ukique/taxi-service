@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func CreateConnection(ctx context.Context, databaseURL string) (*pgx.Conn, error) {
-	conn, err := pgx.Connect(ctx, databaseURL)
+func CreateConnection(ctx context.Context, dataBaseURL string) (*pgxpool.Pool, error) {
+	pool, err := pgxpool.New(ctx, dataBaseURL)
 	if err != nil {
-		return nil, fmt.Errorf("fail connect to database: %w", err)
+		return nil, fmt.Errorf("failed connect to database %w", err)
 	}
-	return conn, nil
+	return pool, err
 }
