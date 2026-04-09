@@ -24,54 +24,45 @@ func GenerateCoordinates() (float64, float64, time.Time) {
 
 // SendCoordinates sends to the message broker messages of the following structure
 // Example structure you can check in docs/examples/message_broker_structure.md
-func SendCoordinates(ctx context.Context, pool *pgxpool.Pool, ch *amqp.Channel, orderCoordinatesQueue amqp.Queue, orders []models.Order) error {
-	for _, order := range orders {
-		//Getting random coordinates
-		var coordinates models.Coordinates
-		coordinates.Lat, coordinates.Lon, coordinates.GeneratedTime = GenerateCoordinates()
+func SendCoordinates(ctx context.Context, pool *pgxpool.Pool, ch *amqp.Channel, orderCoordinatesQueue amqp.Queue, order models.Order) error {
 
-		order.Status = "in_progress"
-		orderStatus := "in_progress"
-		err := orderFeatures.UpdateOrderStatus(ctx, pool, order.ID, orderStatus)
-		if err != nil {
-			log.Println("fail to change order status:", err)
-			return err
-		}
+	var coordinates models.Coordinates
+	coordinates.Lat, coordinates.Lon, coordinates.GeneratedTime = GenerateCoordinates()
 
-		//collect message for message broker
-		orderBody := models.OrderCoordinateEvent{
-			DriverID: order.DriverID,
-			Coordinates: models.Coordinates{
-				Lat:           coordinates.Lat,
-				Lon:           coordinates.Lon,
-				GeneratedTime: coordinates.GeneratedTime,
-			},
-			Order: models.Order{
-				ID:     order.ID,
-				Status: order.Status,
-			},
-		}
-
-		orderData, err := json.Marshal(orderBody)
-		if err != nil {
-			log.Println("fail to marshal orderBody:")
-			return err
-		}
-
-		err = ch.Publish(
-			"", //exchange
-			orderCoordinatesQueue.Name,
-			false, // mandatory
-			false, // immediate
-			amqp.Publishing{
-				ContentType: "application/json",
-				Body:        orderData,
-			},
-		)
-		if err != nil {
-			log.Println("fail to publish orderData:", err)
-			return err
-		}
+	order.Status = "in_progress"
+	err := orderFeatures.UpdateOrderStatus(ctx, pool, order.ID, "in_progress")
+	if err != nil {
+		log.Println("fail to change order status:", err)
+		return err
 	}
-	return nil
+
+	orderBody := models.OrderCoordinateEvent{
+		DriverID: order.DriverID,
+		Coordinates: models.Coordinates{
+			Lat:           coordinates.Lat,
+			Lon:           coordinates.Lon,
+			GeneratedTime: coordinates.GeneratedTime,
+		},
+		Order: models.Order{
+			ID:     order.ID,
+			Status: order.Status,
+		},
+	}
+
+	orderData, err := json.Marshal(orderBody)
+	if err != nil {
+		log.Println("fail to marshal orderBody:")
+		return err
+	}
+
+	return ch.Publish(
+		"",
+		orderCoordinatesQueue.Name,
+		false,
+		false,
+		amqp.Publishing{
+			ContentType: "application/json",
+			Body:        orderData,
+		},
+	)
 }

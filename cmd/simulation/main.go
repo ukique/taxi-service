@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -11,6 +12,7 @@ import (
 	"github.com/ukique/taxi-service/internal/core/rabbitmq"
 	orderFeatures "github.com/ukique/taxi-service/internal/features/order/repository"
 	"github.com/ukique/taxi-service/internal/features/order/services"
+	"github.com/ukique/taxi-service/internal/models"
 )
 
 func main() {
@@ -67,18 +69,34 @@ func main() {
 		os.Exit(1)
 	}
 
+	var processed sync.Map
+
 	for {
 		orders, err := orderFeatures.GetCreatedOrders(ctx, pool)
 		if err != nil {
 			log.Println("fail to get orders:", err)
+			time.Sleep(1 * time.Second)
+			continue
 		}
-		//Send coordinate to RabbitMQ
-		for i := 0; i < 50; i++ {
-			err := services.SendCoordinates(ctx, pool, brokerChannel, orderCoordinatesQueue, orders)
-			if err != nil {
-				log.Println("fail to send Coordinates:", err)
+
+		for _, order := range orders {
+			if _, exists := processed.Load(order.ID); exists {
+				continue
 			}
-			time.Sleep(5 * time.Second)
+			processed.Store(order.ID, true)
+
+			go func(order models.Order) {
+				defer processed.Delete(order.ID)
+
+				for i := 0; i < 50; i++ {
+					err := services.SendCoordinates(ctx, pool, brokerChannel, orderCoordinatesQueue, order)
+					if err != nil {
+						log.Println("fail to send coordinate:", err)
+					}
+					time.Sleep(5 * time.Second)
+				}
+			}(order)
 		}
+		time.Sleep(1 * time.Second)
 	}
 }
