@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"log"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/ukique/taxi-service/internal/features/locations/repository"
 	"github.com/ukique/taxi-service/internal/models"
 )
 
-func LocationDatabaseConsumer(ctx context.Context, conn *pgx.Conn, ch *amqp.Channel, orderCoordinatesQueue amqp.Queue) error {
+func LocationDatabaseConsumer(ctx context.Context, pool *pgxpool.Pool, ch *amqp.Channel, orderCoordinatesQueue amqp.Queue) error {
 	orders, err := ch.Consume(
 		orderCoordinatesQueue.Name,
 		"",    // consumer tag
@@ -32,7 +32,7 @@ func LocationDatabaseConsumer(ctx context.Context, conn *pgx.Conn, ch *amqp.Chan
 			return err
 		}
 		log.Println("saving location for driver:", event.DriverID)
-		go repository.SaveLocation(ctx, conn, event)
+		go repository.SaveLocation(ctx, pool, event)
 	}
 	return nil
 }

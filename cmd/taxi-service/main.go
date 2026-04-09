@@ -24,7 +24,6 @@ func main() {
 		log.Println("Error loading .env file", err)
 		os.Exit(1)
 	}
-
 	// get DATABASE_URL from .env
 	dataBaseURL := os.Getenv("DATABASE_URL")
 
@@ -36,16 +35,11 @@ func main() {
 
 	// create *Conn for database features
 	ctx := context.Background()
-	conn, err := database.CreateConnection(ctx, dataBaseURL)
+	pool, err := database.CreateConnection(ctx, dataBaseURL)
 	if err != nil {
-		log.Println("fail connect to database:", err)
+		log.Println(err)
 		os.Exit(1)
 	}
-	defer func() {
-		if err := conn.Close(ctx); err != nil {
-			log.Println("fail to close database connection:", err)
-		}
-	}()
 
 	// create *amqp.Connection for RabbitMQ features
 	brokerConn, err := rabbitmq.CreateRabbitMQConnection(rabbitmqURL)
@@ -80,7 +74,7 @@ func main() {
 	}
 
 	go func() {
-		if err := rabbitmq.LocationDatabaseConsumer(ctx, conn, brokerChannel, orderCoordinatesQueue); err != nil {
+		if err := rabbitmq.LocationDatabaseConsumer(ctx, pool, brokerChannel, orderCoordinatesQueue); err != nil {
 			log.Println("consume error:", err)
 			os.Exit(1)
 		}
@@ -94,19 +88,19 @@ func main() {
 		AllowHeaders: []string{"Content-Type"},
 	}))
 	//users
-	router.POST("/users/register", userTransport.RegisterUserHandler(conn))
-	router.POST("/users/authentication", userTransport.AuthenticationUserHandler(conn, secretKey))
+	router.POST("/users/register", userTransport.RegisterUserHandler(pool))
+	router.POST("/users/authentication", userTransport.AuthenticationUserHandler(pool, secretKey))
 
 	//drivers
-	router.POST("/drivers/register", driverTransport.RegisterDriverHandler(conn))
-	router.GET("/drivers", driverTransport.AllDriversHandler(conn))
-	router.DELETE("/drivers/:id", driverTransport.DeleteDriverHandler(conn))
-	router.PATCH("/drivers/:id/username", driverTransport.ChangeDriverNameHandler(conn))
-	router.PATCH("/drivers/:id/status", driverTransport.ChangeDriverStatusHandler(conn))
+	router.POST("/drivers/register", driverTransport.RegisterDriverHandler(pool))
+	router.GET("/drivers", driverTransport.AllDriversHandler(pool))
+	router.DELETE("/drivers/:id", driverTransport.DeleteDriverHandler(pool))
+	router.PATCH("/drivers/:id/username", driverTransport.ChangeDriverNameHandler(pool))
+	router.PATCH("/drivers/:id/status", driverTransport.ChangeDriverStatusHandler(pool))
 	//orders
-	router.POST("/orders", orderTransport.CreateOrderHandler(conn))
-	router.GET("/orders", orderTransport.GetAllOrdersHandler(conn))
-	router.GET("/orders/complete", orderTransport.CompleteOrderHandler(conn))
+	router.POST("/orders", orderTransport.CreateOrderHandler(pool))
+	router.GET("/orders", orderTransport.GetAllOrdersHandler(pool))
+	router.GET("/orders/complete", orderTransport.CompleteOrderHandler(pool))
 	router.GET("/orders/details/:id")
 	if err := router.Run(":8080"); err != nil {
 		log.Println("fail run server on port 8080:", err)

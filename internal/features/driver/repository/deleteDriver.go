@@ -3,14 +3,14 @@ package repository
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func DeleteDriverByID(ctx context.Context, conn *pgx.Conn, id int) error {
+func DeleteDriverByID(ctx context.Context, pool *pgxpool.Pool, id int) error {
 	sqlQuery := `
 	DELETE FROM users WHERE id = $1;
 `
-	if _, err := conn.Exec(ctx, sqlQuery, id); err != nil {
+	if _, err := pool.Exec(ctx, sqlQuery, id); err != nil {
 		return err
 	}
 	return nil
