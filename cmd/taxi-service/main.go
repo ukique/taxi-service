@@ -11,7 +11,6 @@ import (
 	"github.com/ukique/taxi-service/internal/core/database"
 	"github.com/ukique/taxi-service/internal/core/rabbitmq"
 	driverTransport "github.com/ukique/taxi-service/internal/features/driver/transport"
-
 	userTransport "github.com/ukique/taxi-service/internal/features/user/transport"
 
 	orderTransport "github.com/ukique/taxi-service/internal/features/order/transport"
@@ -102,6 +101,7 @@ func main() {
 	router.GET("/orders", orderTransport.GetAllOrdersHandler(pool))
 	router.GET("/orders/complete", orderTransport.CompleteOrderHandler(pool))
 	router.GET("/orders/details/:id")
+
 	if err := router.Run(":8080"); err != nil {
 		log.Println("fail run server on port 8080:", err)
 		os.Exit(1)

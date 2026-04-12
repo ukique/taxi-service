@@ -3,36 +3,30 @@ package services
 import (
 	"context"
 	"fmt"
-	"math/rand"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/ukique/taxi-service/internal/features/driver/repository"
 	"github.com/ukique/taxi-service/internal/models"
 )
 
-func CreateOrder(ctx context.Context, pool *pgxpool.Pool, userID int) error {
+func CreateOrder(ctx context.Context, pool *pgxpool.Pool) error {
 	driverID, err := repository.SearchAvailableDriver(ctx, pool)
 	if err != nil {
 		return fmt.Errorf("fail to find driver: %w", err)
 	}
 
 	const orderStatus = models.OrderStatus("created")
-	pickupLat := rand.Float64()*180 - 90
-	pickupLon := rand.Float64()*360 - 180
-	dropoutLat := rand.Float64()*180 - 90
-	dropoutLon := rand.Float64()*360 - 180
 
 	sqlQuery := `
-	INSERT INTO orders(user_id, driver_id, pickup_lat, pickup_lon ,dropout_lat,dropout_lon,status)
-	VALUES ($1, $2, $3, $4, $5, $6, $7)
-		
+	INSERT INTO orders(driver_id,status)
+	VALUES ($1, $2)
 `
 	driverStatus := "driving"
 	// unlock driver in db after too (check SearchAvailableDriver func)
 	if err := repository.ChangeDriverStatus(ctx, pool, driverID, driverStatus); err != nil {
 		return fmt.Errorf("fail to change driver status: %w", err)
 	}
-	_, err = pool.Exec(ctx, sqlQuery, userID, driverID, pickupLat, pickupLon, dropoutLat, dropoutLon, orderStatus)
+	_, err = pool.Exec(ctx, sqlQuery, driverID, orderStatus)
 	if err != nil {
 		return fmt.Errorf("fail to insert into orders: %w", err)
 	}

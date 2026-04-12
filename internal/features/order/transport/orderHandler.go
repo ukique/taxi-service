@@ -9,19 +9,11 @@ import (
 	driver "github.com/ukique/taxi-service/internal/features/driver/repository"
 	order "github.com/ukique/taxi-service/internal/features/order/repository"
 	"github.com/ukique/taxi-service/internal/features/order/services"
-
-	"github.com/ukique/taxi-service/internal/models"
 )
 
 func CreateOrderHandler(pool *pgxpool.Pool) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		var order models.Order
-		if err := c.ShouldBindJSON(&order); err != nil {
-			log.Println("fail to read JSON body:", err)
-			c.JSON(http.StatusBadRequest, gin.H{"message": "incorrect data!"})
-			return
-		}
-		if err := services.CreateOrder(c.Request.Context(), pool, order.UserID); err != nil {
+		if err := services.CreateOrder(c.Request.Context(), pool); err != nil {
 			log.Println("fail to create Order:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "fail to create Order"})
 			return
