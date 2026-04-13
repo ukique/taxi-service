@@ -29,9 +29,11 @@
 
 .driver-register h2 {
     font-family: "DM Sans", sans-serif;
-
 }
-
+.red-text{
+    font-family: "DM Sans", sans-serif;
+    color: #ed4545;
+}
 .driver-register p {
     font-family: "DM Sans", sans-serif;
     color: #6b7280;

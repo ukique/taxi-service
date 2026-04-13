@@ -206,6 +206,8 @@ function AllDriversTable() {
             {openPopupDeleteDriver &&
                 <div className="driver-register">
                     <h2>Delete Driver</h2>
+                    <h4 className="red-text">You also will delete<br />
+                        orders with this id</h4>
                     <p>Driver ID</p>
                     <input
                         name="id"
