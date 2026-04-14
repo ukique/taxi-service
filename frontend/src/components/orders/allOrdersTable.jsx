@@ -37,30 +37,18 @@ function AllOrdersTable() {
                         <thead>
                         <tr>
                             <th>ID</th>
-                            <th>User ID</th>
                             <th>Driver ID</th>
-                            <th>PickUp_Lat</th>
-                            <th>PickUp_Lon</th>
-                            <th>DropOut_Lat</th>
-                            <th>DropOut_Lon</th>
                             <th>Status</th>
                             <th>Created_At</th>
-                            <th>Updated_At</th>
                         </tr>
                         </thead>
                         <tbody>
                         {filteredOrders.toReversed().map(order => (
                             <tr key={order.id}>
                                 <td><a className="order-status-id" href={`/orders/page/${order.id}`}>{order.id}</a></td>
-                                <td>{order.user_id}</td>
                                 <td>{order.driver_id}</td>
-                                <td>{order.pick_up_lat}</td>
-                                <td>{order.pick_up_lon}</td>
-                                <td>{order.drop_out_lat}</td>
-                                <td>{order.drop_out_lon}</td>
                                 <td>{order.status}</td>
                                 <td>{order.created_at}</td>
-                                <td>{order.updated_at}</td>
                             </tr>
                         ))}
                         </tbody>
