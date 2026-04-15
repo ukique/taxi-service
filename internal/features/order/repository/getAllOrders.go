@@ -7,12 +7,16 @@ import (
 	"github.com/ukique/taxi-service/internal/models"
 )
 
-func GetAllOrders(ctx context.Context, pool *pgxpool.Pool) ([]models.Order, error) {
+func GetOrdersData(ctx context.Context, pool *pgxpool.Pool, pageID int) ([]models.Order, error) {
 	sqlQuery := `
-  SELECT id, driver_id, status, created_at FROM orders;
+  SELECT id, driver_id, status, created_at FROM orders
+  ORDER BY id DESC 
+  LIMIT $1 OFFSET $2;
 `
+	recordsLimit := 50
+	offest := recordsLimit * (pageID - 1)
 	var orders []models.Order
-	rows, err := pool.Query(ctx, sqlQuery)
+	rows, err := pool.Query(ctx, sqlQuery, recordsLimit, offest)
 	if err != nil {
 		return nil, err
 	}
