@@ -6,7 +6,8 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/ukique/taxi-service/internal/features/order/repository"
+	driverRepository "github.com/ukique/taxi-service/internal/features/driver/repository"
+	orderRepository "github.com/ukique/taxi-service/internal/features/order/repository"
 )
 
 func (h *Handler) WebSocketHandler(c *gin.Context) {
@@ -43,7 +44,7 @@ func (h *Handler) WebSocketHandler(c *gin.Context) {
 			log.Println("failed to get order_id:", err)
 			return
 		}
-		orders, err := repository.GetOrdersData(ctx, h.pool, intOrderPageID)
+		orders, err := orderRepository.GetOrdersData(ctx, h.pool, intOrderPageID)
 		if err != nil {
 			return
 		}
@@ -51,6 +52,21 @@ func (h *Handler) WebSocketHandler(c *gin.Context) {
 			return
 		}
 		go h.OrdersHandler(ctx, safe, intOrderPageID)
+	case "drivers":
+		driverPageID := c.Param("id")
+		intDriverPageID, err := strconv.Atoi(driverPageID)
+		if err != nil {
+			log.Println("failed to get driver_id:", err)
+			return
+		}
+		drivers, err := driverRepository.GetDriversData(ctx, h.pool, intDriverPageID)
+		if err != nil {
+			return
+		}
+		if err := safe.WriteJSON(drivers); err != nil {
+			return
+		}
+		go h.DriversHandler(ctx, safe, intDriverPageID)
 	}
 	<-ctx.Done()
 }

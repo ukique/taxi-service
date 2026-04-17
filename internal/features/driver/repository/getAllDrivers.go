@@ -7,12 +7,16 @@ import (
 	"github.com/ukique/taxi-service/internal/models"
 )
 
-func GetAllDrivers(ctx context.Context, pool *pgxpool.Pool) ([]models.Driver, error) {
+func GetDriversData(ctx context.Context, pool *pgxpool.Pool, pageID int) ([]models.Driver, error) {
 	sqlQuery := `
-  SELECT id,username, status FROM drivers;
+  SELECT id,username, status FROM drivers
+  ORDER BY id DESC 
+  LIMIT $1 OFFSET $2;
 `
+	recordsLimit := 50
+	offest := recordsLimit * (pageID - 1)
 	var drivers []models.Driver
-	rows, err := pool.Query(ctx, sqlQuery)
+	rows, err := pool.Query(ctx, sqlQuery, recordsLimit, offest)
 	if err != nil {
 		return nil, err
 	}

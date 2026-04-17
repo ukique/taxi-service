@@ -100,7 +100,6 @@ func main() {
 
 	//drivers
 	router.POST("/drivers/register", driverHandler.RegisterDriverHandler)
-	router.GET("/drivers", driverTransport.AllDriversHandler(pool))
 	router.DELETE("/drivers/:id", driverHandler.DeleteDriverHandler)
 	router.PATCH("/drivers/:id/username", driverHandler.ChangeDriverNameHandler)
 	router.PATCH("/drivers/:id/status", driverHandler.ChangeDriverStatusHandler)
