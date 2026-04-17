@@ -10,6 +10,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/ukique/taxi-service/internal/core/database"
 	"github.com/ukique/taxi-service/internal/core/rabbitmq"
+	"github.com/ukique/taxi-service/internal/core/ws"
 	driverTransport "github.com/ukique/taxi-service/internal/features/driver/transport"
 	userTransport "github.com/ukique/taxi-service/internal/features/user/transport"
 
@@ -82,6 +83,7 @@ func main() {
 	userHandler := userTransport.NewUserRegisterHandler(pool)
 	authUserHandler := userTransport.NewAuthUserHandler(pool, secretKey)
 	driverHandler := driverTransport.NewDriverHandler(pool)
+	ws := ws.NewWSHandler(pool)
 
 	//GIN setup
 	router := gin.Default()
@@ -91,20 +93,18 @@ func main() {
 		AllowHeaders: []string{"Content-Type"},
 	}))
 	//websocket
-	router.GET("/ws")
+	router.GET("/ws/:channel/:id", ws.WebSocketHandler)
 	//users
 	router.POST("/users/register", userHandler.RegisterUserHandler)
 	router.POST("/users/authentication", authUserHandler.AuthenticationUserHandler)
 
 	//drivers
 	router.POST("/drivers/register", driverHandler.RegisterDriverHandler)
-	router.GET("/drivers", driverTransport.AllDriversHandler(pool))
 	router.DELETE("/drivers/:id", driverHandler.DeleteDriverHandler)
 	router.PATCH("/drivers/:id/username", driverHandler.ChangeDriverNameHandler)
 	router.PATCH("/drivers/:id/status", driverHandler.ChangeDriverStatusHandler)
 	//orders
 	router.POST("/orders", orderHandler.CreateOrderHandler)
-	router.GET("/orders", orderTransport.GetAllOrdersHandler(pool))
 	router.GET("/orders/complete", orderHandler.CompleteOrderHandler)
 	router.GET("/orders/details/:id")
 	if err := router.Run(":8080"); err != nil {
