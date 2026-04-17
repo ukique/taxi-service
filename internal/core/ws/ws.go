@@ -1,58 +1,56 @@
 package ws
 
 import (
+	"context"
 	"log"
-	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/ukique/taxi-service/internal/features/order/repository"
 )
 
-type WSHandler struct {
-	pool *pgxpool.Pool
-}
-
-func NewWSHandler(pool *pgxpool.Pool) *WSHandler {
-	return &WSHandler{pool: pool}
-}
-
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024 * 4,
-	WriteBufferSize: 1024 * 32,
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
-}
-
-func (h *WSHandler) WebSocketHandler(c *gin.Context) {
-	channel := c.Param("channel")
+func (h *Handler) WebSocketHandler(c *gin.Context) {
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		log.Println("failed to upgrade ws connection:", err)
 		return
 	}
 	defer conn.Close()
-	
+
+	//cancel when client disconnected
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	safe := &safeConn{conn: conn}
+	channel := c.Param("channel")
+
+	//detects that client disconnected
+	go func() {
+		defer cancel()
+		for {
+			_, _, err := conn.ReadMessage()
+			if err != nil {
+				return
+			}
+		}
+	}()
+
 	switch channel {
 	case "orders":
-		orderID := c.Param("id")
-		intOrderID, err := strconv.Atoi(orderID)
+		orderPageID := c.Param("id")
+		intOrderPageID, err := strconv.Atoi(orderPageID)
 		if err != nil {
 			log.Println("failed to get order_id:", err)
-			break
+			return
 		}
-		orders, err := repository.GetOrdersData(c.Request.Context(), h.pool, intOrderID)
+		orders, err := repository.GetOrdersData(ctx, h.pool, intOrderPageID)
 		if err != nil {
-			log.Println("failed to get ordersData:", err)
-			break
+			return
 		}
-		err = conn.WriteJSON(orders)
-		if err != nil {
-			log.Println("failed to send orders:", err)
-			break
+		if err := safe.WriteJSON(orders); err != nil {
+			return
 		}
+		go h.OrdersHandler(ctx, safe, intOrderPageID)
 	}
+	<-ctx.Done()
 }
