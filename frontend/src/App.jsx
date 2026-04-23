@@ -6,17 +6,17 @@ import Registration from "./pages/registerPage/registerPage.jsx";
 import Authentication from "./pages/authenticationPage/authenticationPage.jsx";
 
 function App() {
-  return (
-    <>
-      <Routes>
-          <Route path="/" element={<Navigate to="/orders" />} />
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/drivers" element={<Drivers />} />
-          <Route path="/users/register" element={<Registration />} />
-          <Route path="/users/authentication" element={<Authentication/>} />
-      </Routes>
-    </>
-  )
+    return (
+        <>
+            <Routes>
+                <Route path="/" element={<Navigate to="/orders"/>}/>
+                <Route path="/orders" element={<Orders/>}/>
+                <Route path="/drivers" element={<Drivers/>}/>
+                <Route path="/users/register" element={<Registration/>}/>
+                <Route path="/users/authentication" element={<Authentication/>}/>
+            </Routes>
+        </>
+    )
 }
 
 export default App

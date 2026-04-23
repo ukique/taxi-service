@@ -5,6 +5,7 @@ import {useLocation, useNavigate} from "react-router-dom";
 function Header() {
     const location = useLocation()
     const navigate = useNavigate()
+    let userName = localStorage.getItem("username");
     return (
         <>
             <header className="header">
@@ -15,6 +16,7 @@ function Header() {
                     <button className={`headerButton ${location.pathname === "/drivers" ? "active" : ""}`} onClick={() => navigate("/drivers")}>Drivers
                     </button>
                 </nav>
+                <p>{userName}</p>
             </header>
         </>
     )

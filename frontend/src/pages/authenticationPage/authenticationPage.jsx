@@ -21,6 +21,7 @@ function Authentication() {
             const response = await fetch("http://localhost:8080/users/authentication", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
+                credentials: "include",
                 body: JSON.stringify(form)
             })
             const result = await response.json()
@@ -32,7 +33,7 @@ function Authentication() {
                 setError(result.message)
             }
         } catch (err) {
-            setError("Network error. Please try again.")
+            setError("Network error. Please try again." + err)
         } finally {
             setIsLoading(false)
         }

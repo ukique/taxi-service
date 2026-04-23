@@ -82,22 +82,25 @@ func main() {
 	orderHandler := orderTransport.NewOrderHandler(pool)
 	userHandler := userTransport.NewUserRegisterHandler(pool)
 	authUserHandler := userTransport.NewAuthUserHandler(pool, secretKey)
-	driverHandler := driverTransport.NewDriverHandler(pool)
+	driverHandler := driverTransport.NewDriverHandler(pool, secretKey)
+	refreshTokenHandler := userTransport.NewRefreshHandler(secretKey)
+
 	ws := ws.NewWSHandler(pool)
 
 	//GIN setup
 	router := gin.Default()
 	router.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"http://localhost:5173"},
-		AllowMethods: []string{"GET", "POST", "PATCH", "PUT", "DELETE"},
-		AllowHeaders: []string{"Content-Type"},
+		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowMethods:     []string{"GET", "POST", "PATCH", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Content-Type"},
+		AllowCredentials: true,
 	}))
 	//websocket
 	router.GET("/ws/:channel/:id", ws.WebSocketHandler)
 	//users
 	router.POST("/users/register", userHandler.RegisterUserHandler)
 	router.POST("/users/authentication", authUserHandler.AuthenticationUserHandler)
-
+	router.POST("/refreshToken", refreshTokenHandler.RefreshTokenHandler)
 	//drivers
 	router.POST("/drivers/register", driverHandler.RegisterDriverHandler)
 	router.DELETE("/drivers/:id", driverHandler.DeleteDriverHandler)

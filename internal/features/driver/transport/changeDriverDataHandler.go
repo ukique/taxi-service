@@ -12,11 +12,12 @@ import (
 )
 
 type DriverHandler struct {
-	pool *pgxpool.Pool
+	pool      *pgxpool.Pool
+	secretKey string
 }
 
-func NewDriverHandler(pool *pgxpool.Pool) *DriverHandler {
-	return &DriverHandler{pool: pool}
+func NewDriverHandler(pool *pgxpool.Pool, secretKey string) *DriverHandler {
+	return &DriverHandler{pool: pool, secretKey: secretKey}
 }
 
 func (h *DriverHandler) ChangeDriverNameHandler(c *gin.Context) {
