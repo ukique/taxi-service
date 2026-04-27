@@ -1,5 +1,6 @@
 import "./createOrder.css"
 import {useState} from "react";
+import {refreshAccessToken} from "../../api/authApi.js";
 
 function CreateOrderButton() {
     const [openPopup, setOpenPopup] = useState(false)
@@ -10,10 +11,21 @@ function CreateOrderButton() {
         try {
             setIsLoading(true)
             setError(null)
-            const response = await fetch("http://localhost:8080/orders", {
+            let response = await fetch("http://localhost:8080/orders", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
+                credentials: "include"
             })
+
+            if (response.status === 401) {
+                await refreshAccessToken()
+                response = await fetch("http://localhost:8080/orders", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    credentials: "include"
+                })
+            }
+
             const result = await response.json()
             if (result.ok) {
                 setOpenPopup(false)
@@ -21,7 +33,7 @@ function CreateOrderButton() {
                 setError(result.message)
             }
         } catch (err) {
-            setError("Network error. Please try again.")
+            setError("Something went wrong, please try again.")
         } finally {
             setIsLoading(false)
         }

@@ -79,11 +79,11 @@ func main() {
 			os.Exit(1)
 		}
 	}()
-	orderHandler := orderTransport.NewOrderHandler(pool)
+	orderHandler := orderTransport.NewOrderHandler(pool, secretKey)
 	userHandler := userTransport.NewUserRegisterHandler(pool)
 	authUserHandler := userTransport.NewAuthUserHandler(pool, secretKey)
 	driverHandler := driverTransport.NewDriverHandler(pool, secretKey)
-	refreshTokenHandler := userTransport.NewRefreshHandler(secretKey)
+	refreshTokenHandler := userTransport.NewRefreshHandler(pool, secretKey)
 
 	ws := ws.NewWSHandler(pool)
 
@@ -107,8 +107,8 @@ func main() {
 	router.PATCH("/drivers/:id/username", driverHandler.ChangeDriverNameHandler)
 	router.PATCH("/drivers/:id/status", driverHandler.ChangeDriverStatusHandler)
 	//orders
-	router.POST("/orders", orderHandler.CreateOrderHandler)
-	router.GET("/orders/complete", orderHandler.CompleteOrderHandler)
+	router.POST("/orders", orderHandler.CreateOrderHandler)           // only this is work correctly with jwt
+	router.GET("/orders/complete", orderHandler.CompleteOrderHandler) // not using jwt
 	router.GET("/orders/details/:id")
 	if err := router.Run(":8080"); err != nil {
 		log.Println("fail run server on port 8080:", err)

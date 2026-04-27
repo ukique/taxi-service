@@ -9,17 +9,31 @@ import (
 	driver "github.com/ukique/taxi-service/internal/features/driver/repository"
 	order "github.com/ukique/taxi-service/internal/features/order/repository"
 	"github.com/ukique/taxi-service/internal/features/order/services"
+	"github.com/ukique/taxi-service/internal/middleware"
 )
 
 type Handler struct {
-	pool *pgxpool.Pool
+	pool      *pgxpool.Pool
+	secretKey string
 }
 
-func NewOrderHandler(pool *pgxpool.Pool) *Handler {
-	return &Handler{pool: pool}
+func NewOrderHandler(pool *pgxpool.Pool, secretKey string) *Handler {
+	return &Handler{pool: pool, secretKey: secretKey}
 }
 
 func (h *Handler) CreateOrderHandler(c *gin.Context) {
+	clientToken, err := c.Cookie("accessToken")
+	if err != nil {
+		log.Println("failed to get clientAccessToken: ", err)
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "you aren't authorized!"})
+		return
+	}
+	_, err = middleware.VerifyJWT(h.secretKey, clientToken)
+	if err != nil {
+		log.Println("Client token is fake:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"message": "your token isn't correct, try authorize again."})
+		return
+	}
 	if err := services.CreateOrder(c.Request.Context(), h.pool); err != nil {
 		log.Println("fail to create Order:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "fail to create Order"})

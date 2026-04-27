@@ -16,8 +16,8 @@ type RefreshHandler struct {
 	pool      *pgxpool.Pool
 }
 
-func NewRefreshHandler(secretKey string) *RefreshHandler {
-	return &RefreshHandler{secretKey: secretKey}
+func NewRefreshHandler(pool *pgxpool.Pool, secretKey string) *RefreshHandler {
+	return &RefreshHandler{pool: pool, secretKey: secretKey}
 }
 
 func (h *RefreshHandler) RefreshTokenHandler(c *gin.Context) {

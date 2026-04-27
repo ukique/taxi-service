@@ -4,8 +4,8 @@ import Orders from "./pages/ordersPage/ordersPage.jsx";
 import Drivers from "./pages/driversPage/driversPage.jsx";
 import Registration from "./pages/registerPage/registerPage.jsx";
 import Authentication from "./pages/authenticationPage/authenticationPage.jsx";
-
 function App() {
+    
     return (
         <>
             <Routes>

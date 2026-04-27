@@ -1,6 +1,7 @@
 import './authenticationPage.css'
 import logoWhite from "../../assets/logoWhite.png";
 import "../../pages/registerPage/registerPage.css";
+import {jwtDecode} from "jwt-decode";
 import {useNavigate} from "react-router-dom";
 import {useState} from "react";
 
@@ -26,8 +27,12 @@ function Authentication() {
             })
             const result = await response.json()
             if (response.ok) {
-                localStorage.setItem("token", result.token)
-                localStorage.setItem("username", form.username)
+                const token = document.cookie
+                    .split('; ')
+                    .find(row => row.startsWith('accessToken='))
+                    ?.split('=')[1]
+                const userName = token ? jwtDecode(token)?.username : null
+                localStorage.setItem("username", userName)
                 navigate("/")
             } else {
                 setError(result.message)
@@ -73,10 +78,11 @@ function Authentication() {
                     <button onClick={handleSubmit} disabled={isLoading} className="register-button">
                         {isLoading ? "Creating..." : "Sign In"}
                     </button>
-                    <p className="register-auth-request">Don't have an account? <a onClick={() => navigate("/users/register")}>Sign up</a></p>
+                    <p className="register-auth-request">Don't have an account? <a
+                        onClick={() => navigate("/users/register")}>Sign up</a></p>
                 </div>
             </div>
-            </>
+        </>
     )
 }
 

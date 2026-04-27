@@ -24,7 +24,7 @@ func SaveRefreshToken(ctx context.Context, pool *pgxpool.Pool, token models.Refr
 
 func SearchRefreshToken(ctx context.Context, pool *pgxpool.Pool, clientToken string) (models.RefreshToken, error) {
 	sqlQuery := `
-	SELECT username, created_at, expires_at WHERE refresh_token = $1;
+	SELECT username, refresh_token, created_at, expires_at FROM refresh_tokens WHERE refresh_token = $1;
 `
 	var refreshToken models.RefreshToken
 	row := pool.QueryRow(ctx, sqlQuery, clientToken)
@@ -37,5 +37,3 @@ func SearchRefreshToken(ctx context.Context, pool *pgxpool.Pool, clientToken str
 	}
 	return refreshToken, nil
 }
-
-//SearchCreateToken
