@@ -79,33 +79,36 @@ func main() {
 			os.Exit(1)
 		}
 	}()
-	orderHandler := orderTransport.NewOrderHandler(pool)
+	orderHandler := orderTransport.NewOrderHandler(pool, secretKey)
 	userHandler := userTransport.NewUserRegisterHandler(pool)
 	authUserHandler := userTransport.NewAuthUserHandler(pool, secretKey)
-	driverHandler := driverTransport.NewDriverHandler(pool)
+	driverHandler := driverTransport.NewDriverHandler(pool, secretKey)
+	refreshTokenHandler := userTransport.NewRefreshHandler(pool, secretKey)
+
 	ws := ws.NewWSHandler(pool)
 
 	//GIN setup
 	router := gin.Default()
 	router.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"http://localhost:5173"},
-		AllowMethods: []string{"GET", "POST", "PATCH", "PUT", "DELETE"},
-		AllowHeaders: []string{"Content-Type"},
+		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowMethods:     []string{"GET", "POST", "PATCH", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Content-Type"},
+		AllowCredentials: true,
 	}))
 	//websocket
 	router.GET("/ws/:channel/:id", ws.WebSocketHandler)
 	//users
 	router.POST("/users/register", userHandler.RegisterUserHandler)
 	router.POST("/users/authentication", authUserHandler.AuthenticationUserHandler)
-
+	router.POST("/refreshToken", refreshTokenHandler.RefreshTokenHandler)
 	//drivers
-	router.POST("/drivers/register", driverHandler.RegisterDriverHandler)
+	router.POST("/drivers/create", driverHandler.CreateDriverHandler)
 	router.DELETE("/drivers/:id", driverHandler.DeleteDriverHandler)
 	router.PATCH("/drivers/:id/username", driverHandler.ChangeDriverNameHandler)
 	router.PATCH("/drivers/:id/status", driverHandler.ChangeDriverStatusHandler)
-	//orders
+	//order
 	router.POST("/orders", orderHandler.CreateOrderHandler)
-	router.GET("/orders/complete", orderHandler.CompleteOrderHandler)
+	//router.GET("/orders/complete", orderHandler.CompleteOrderHandler)
 	router.GET("/orders/details/:id")
 	if err := router.Run(":8080"); err != nil {
 		log.Println("fail run server on port 8080:", err)

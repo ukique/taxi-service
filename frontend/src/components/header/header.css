@@ -9,7 +9,7 @@
     height: auto;
 }
 
-nav{
+nav {
     display: flex;
     gap: 1rem;
 }
@@ -19,12 +19,17 @@ nav{
     display: flex;
     gap: 2rem;
     align-items: center;
-
     width: 100%;
     border-bottom: 1px solid #222222;
     padding: 0.5rem 2rem;
     background-color: #FFFFFF;
     z-index: 1;
+}
+
+.header p {
+    font-family: "DM Sans", sans-serif;
+    font-size: 1.2rem;
+    margin-left: auto;
 }
 
 .headerButton {
@@ -35,7 +40,8 @@ nav{
     border-radius: 0.5rem;
     cursor: pointer;
 }
-.headerButton.active{
+
+.headerButton.active {
     background-color: #222222;
     font-family: "Montserrat", sans-serif;
     color: #FFFFFF;
