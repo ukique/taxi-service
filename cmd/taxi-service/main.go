@@ -102,13 +102,13 @@ func main() {
 	router.POST("/users/authentication", authUserHandler.AuthenticationUserHandler)
 	router.POST("/refreshToken", refreshTokenHandler.RefreshTokenHandler)
 	//drivers
-	router.POST("/drivers/register", driverHandler.RegisterDriverHandler)
+	router.POST("/drivers/create", driverHandler.CreateDriverHandler)
 	router.DELETE("/drivers/:id", driverHandler.DeleteDriverHandler)
 	router.PATCH("/drivers/:id/username", driverHandler.ChangeDriverNameHandler)
 	router.PATCH("/drivers/:id/status", driverHandler.ChangeDriverStatusHandler)
-	//orders
-	router.POST("/orders", orderHandler.CreateOrderHandler)           // only this is work correctly with jwt
-	router.GET("/orders/complete", orderHandler.CompleteOrderHandler) // not using jwt
+	//order
+	router.POST("/orders", orderHandler.CreateOrderHandler)
+	//router.GET("/orders/complete", orderHandler.CompleteOrderHandler)
 	router.GET("/orders/details/:id")
 	if err := router.Run(":8080"); err != nil {
 		log.Println("fail run server on port 8080:", err)

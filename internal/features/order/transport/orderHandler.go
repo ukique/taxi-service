@@ -43,6 +43,18 @@ func (h *Handler) CreateOrderHandler(c *gin.Context) {
 }
 
 func (h *Handler) CompleteOrderHandler(c *gin.Context) {
+	clientToken, err := c.Cookie("accessToken")
+	if err != nil {
+		log.Println("failed to get clientAccessToken: ", err)
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "you aren't authorized!"})
+		return
+	}
+	_, err = middleware.VerifyJWT(h.secretKey, clientToken)
+	if err != nil {
+		log.Println("Client token is fake:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"message": "your token isn't correct, try authorize again."})
+		return
+	}
 	var body struct {
 		OrderID int `json:"order_id"`
 	}

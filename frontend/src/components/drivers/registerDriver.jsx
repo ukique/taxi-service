@@ -1,5 +1,6 @@
 import "./registerDriver.css"
 import {useState} from "react";
+import {refreshAccessToken} from "../../api/authApi.js";
 
 function RegisterDriverButton() {
     const [openPopup, setOpenPopup] = useState(false)
@@ -13,11 +14,21 @@ function RegisterDriverButton() {
         try {
             setIsLoading(true)
             setError(null)
-            const response = await fetch("http://localhost:8080/drivers/register", {
+            let response = await fetch("http://localhost:8080/drivers/create", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
-                body: JSON.stringify(form)
+                body: JSON.stringify(form),
+                credentials: "include"
             })
+            if (response.status === 401) {
+                await refreshAccessToken()
+                response = await fetch("http://localhost:8080/drivers/create",{
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(form),
+                    credentials: "include"
+                })
+            }
             const result = await response.json()
             if (result.ok) {
                 setOpenPopup(false)

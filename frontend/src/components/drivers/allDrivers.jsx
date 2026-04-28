@@ -1,5 +1,6 @@
 import {useEffect, useState} from "react"
 import "./allDrivers.css"
+import {refreshAccessToken} from "../../api/authApi.js";
 
 function AllDriversTable() {
     const [drivers, setDrivers] = useState([])
@@ -50,11 +51,21 @@ function AllDriversTable() {
         try {
             setIsLoading(true)
             setError(null)
-            const response = await fetch(`http://localhost:8080/drivers/${statusForm.id}/status`, {
+            let response = await fetch(`http://localhost:8080/drivers/${statusForm.id}/status`, {
                 method: "PATCH",
                 headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({status: statusForm.status})
+                body: JSON.stringify({status: statusForm.status}),
+                credentials: "include"
             })
+            if (response.status === 401) {
+                await refreshAccessToken()
+                const response = await fetch(`http://localhost:8080/drivers/${statusForm.id}/status`, {
+                    method: "PATCH",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({status: statusForm.status}),
+                    credentials: "include"
+                })
+            }
             if (response.ok) {
                 setOpenPopupChangeStatus(false)
                 setDrivers(prev => prev.map(driver =>
@@ -77,11 +88,21 @@ function AllDriversTable() {
         try {
             setIsLoading(true)
             setError(null)
-            const response = await fetch(`http://localhost:8080/drivers/${nameForm.id}/username`, {
+            let response = await fetch(`http://localhost:8080/drivers/${nameForm.id}/username`, {
                 method: "PATCH",
                 headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({username: nameForm.username})
+                body: JSON.stringify({username: nameForm.username}),
+                credentials: "include"
             })
+            if (response.status === 401) {
+                await refreshAccessToken()
+                response = await fetch(`http://localhost:8080/drivers/${nameForm.id}/username`, {
+                    method: "PATCH",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({username: nameForm.username}),
+                    credentials: "include"
+                })
+            }
             if (response.ok) {
                 setOpenPopupChangeName(false)
                 setDrivers(prev => prev.map(driver =>
@@ -104,13 +125,20 @@ function AllDriversTable() {
         try {
             setIsLoading(true)
             setError(null)
-            const response = await fetch(`http://localhost:8080/drivers/${deleteForm.id}`, {
+            let response = await fetch(`http://localhost:8080/drivers/${deleteForm.id}`, {
                 method: "DELETE",
+                credentials: "include",
             })
             console.log("status:", response.status)
             console.log("ok:", response.ok)
-
-            if(response.ok) {
+            if (response.status === 401) {
+                await refreshAccessToken()
+                response = await fetch(`http://localhost:8080/drivers/${deleteForm.id}`, {
+                    method: "DELETE",
+                    credentials: "include",
+                })
+            }
+            if (response.ok) {
                 setOpenPopupDeleteDriver(false)
                 setDrivers(prev => prev.filter(driver => driver.id.toString() !== deleteForm.id.toString()))
                 setDeleteForm({id: ""})
@@ -127,14 +155,21 @@ function AllDriversTable() {
         <div className="drivers-table">
             <div className="drivers-input">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="16" height="16" fill="#888">
-                    <path d="M544 513L397.2 364.2C417.2 336.3 429.1 302 429.1 265C429.1 171.9 354.4 96.1 262.6 96.1C170.7 96 96 171.8 96 264.9C96 358 170.7 433.8 262.5 433.8C302.3 433.8 338.8 419.6 367.5 395.9L513.5 544L544 513zM262.5 394.8C191.9 394.8 134.4 336.5 134.4 264.9C134.4 193.3 191.9 135 262.5 135C333.1 135 390.6 193.3 390.6 264.9C390.6 336.5 333.2 394.8 262.5 394.8z"/>
+                    <path
+                        d="M544 513L397.2 364.2C417.2 336.3 429.1 302 429.1 265C429.1 171.9 354.4 96.1 262.6 96.1C170.7 96 96 171.8 96 264.9C96 358 170.7 433.8 262.5 433.8C302.3 433.8 338.8 419.6 367.5 395.9L513.5 544L544 513zM262.5 394.8C191.9 394.8 134.4 336.5 134.4 264.9C134.4 193.3 191.9 135 262.5 135C333.1 135 390.6 193.3 390.6 264.9C390.6 336.5 333.2 394.8 262.5 394.8z"/>
                 </svg>
                 <input value={filterText} onChange={handlerFilterChange} placeholder="Search"/>
                 <div className="drivers-data-buttons">
-                    <button onClick={() => handleOpenPopup(setOpenPopupChangeStatus, () => setStatusForm({id: "", status: "driving"}))}>
+                    <button onClick={() => handleOpenPopup(setOpenPopupChangeStatus, () => setStatusForm({
+                        id: "",
+                        status: "driving"
+                    }))}>
                         Change Status
                     </button>
-                    <button onClick={() => handleOpenPopup(setOpenPopupChangeName, () => setNameForm({id: "", username: ""}))}>
+                    <button onClick={() => handleOpenPopup(setOpenPopupChangeName, () => setNameForm({
+                        id: "",
+                        username: ""
+                    }))}>
                         Change Driver Name
                     </button>
                     <button onClick={() => handleOpenPopup(setOpenPopupDeleteDriver, () => setDeleteForm({id: ""}))}>
@@ -170,8 +205,11 @@ function AllDriversTable() {
                     </div>
                     {error && <p className="register-error">{error}</p>}
                     <div className="drivers-register-buttons">
-                        <button className="add-driver-cancel" onClick={() => setOpenPopupChangeStatus(false)} disabled={isLoading}>Cancel</button>
-                        <button className="add-driver-save" onClick={handleSubmitStatus} disabled={isLoading}>{isLoading ? "Saving..." : "Save"}</button>
+                        <button className="add-driver-cancel" onClick={() => setOpenPopupChangeStatus(false)}
+                                disabled={isLoading}>Cancel
+                        </button>
+                        <button className="add-driver-save" onClick={handleSubmitStatus}
+                                disabled={isLoading}>{isLoading ? "Saving..." : "Save"}</button>
                     </div>
                 </div>
             }
@@ -197,8 +235,11 @@ function AllDriversTable() {
                     />
                     {error && <p className="register-error">{error}</p>}
                     <div className="drivers-register-buttons">
-                        <button className="add-driver-cancel" onClick={() => setOpenPopupChangeName(false)} disabled={isLoading}>Cancel</button>
-                        <button className="add-driver-save" onClick={handleSubmitName} disabled={isLoading}>{isLoading ? "Saving..." : "Save"}</button>
+                        <button className="add-driver-cancel" onClick={() => setOpenPopupChangeName(false)}
+                                disabled={isLoading}>Cancel
+                        </button>
+                        <button className="add-driver-save" onClick={handleSubmitName}
+                                disabled={isLoading}>{isLoading ? "Saving..." : "Save"}</button>
                     </div>
                 </div>
             }
@@ -206,7 +247,7 @@ function AllDriversTable() {
             {openPopupDeleteDriver &&
                 <div className="driver-register">
                     <h2>Delete Driver</h2>
-                    <h4 className="red-text">You also will delete<br />
+                    <h4 className="red-text">You also will delete<br/>
                         orders with this id</h4>
                     <p>Driver ID</p>
                     <input
@@ -218,8 +259,11 @@ function AllDriversTable() {
                     />
                     {error && <p className="register-error">{error}</p>}
                     <div className="drivers-register-buttons">
-                        <button className="add-driver-cancel" onClick={() => setOpenPopupDeleteDriver(false)} disabled={isLoading}>Cancel</button>
-                        <button className="add-driver-save add-driver-delete" onClick={handleSubmitDelete} disabled={isLoading}>{isLoading ? "Deleting..." : "Delete"}</button>
+                        <button className="add-driver-cancel" onClick={() => setOpenPopupDeleteDriver(false)}
+                                disabled={isLoading}>Cancel
+                        </button>
+                        <button className="add-driver-save add-driver-delete" onClick={handleSubmitDelete}
+                                disabled={isLoading}>{isLoading ? "Deleting..." : "Delete"}</button>
                     </div>
                 </div>
             }
