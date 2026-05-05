@@ -1,6 +1,7 @@
 import {useEffect, useState} from "react"
 import "./allDrivers.css"
 import {refreshAccessToken} from "../../api/authApi.js";
+import axios from "axios";
 
 function AllDriversTable() {
     const [drivers, setDrivers] = useState([])
@@ -19,16 +20,18 @@ function AllDriversTable() {
     const [deleteForm, setDeleteForm] = useState({id: ""})
 
     useEffect(() => {
-        fetch("http://localhost:8080/drivers")
-            .then(res => {
-                if (!res.ok) throw new Error(`Server error: ${res.status}`)
-                return res.json()
-            })
-            .then(data => setDrivers(Array.isArray(data) ? data : []))
-            .catch((err) => {
-                setError("Failed to load drivers: " + err.message)
-                setDrivers([])
-            })
+       const load = async () =>{
+           try {
+               const res = await axios.get("http://localhost:8080/drivers",{
+                   credentials: "include"
+               });
+
+           } catch (error){
+               setDrivers([]);
+           }
+
+       };
+       load();
     }, [])
 
     const handlerFilterChange = (event) => setFilterText(event.target.value)

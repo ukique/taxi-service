@@ -34,3 +34,6 @@ func GetDriversData(ctx context.Context, pool *pgxpool.Pool, pageID int) ([]mode
 	}
 	return drivers, nil
 }
+
+//To send orders, drivers and locations to the front-end, use WebSocket.
+//after success rest request , i will just send by ws for all clients (i use hub) that they must upd a page, is it good idea???? (p.s real p

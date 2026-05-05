@@ -7,7 +7,14 @@ import (
 	"github.com/ukique/taxi-service/internal/models"
 )
 
-func GetOrdersData(ctx context.Context, pool *pgxpool.Pool, pageID int) ([]models.Order, error) {
+type OrderRepository struct {
+	pool *pgxpool.Pool
+}
+
+func NewOrderRepository(pool *pgxpool.Pool) *OrderRepository {
+	return &OrderRepository{pool: pool}
+}
+func (o *OrderRepository) GetOrdersData(ctx context.Context, pageID int) ([]models.Order, error) {
 	sqlQuery := `
   SELECT id, driver_id, status, created_at FROM orders
   ORDER BY id DESC 
@@ -16,7 +23,7 @@ func GetOrdersData(ctx context.Context, pool *pgxpool.Pool, pageID int) ([]model
 	recordsLimit := 50
 	offest := recordsLimit * (pageID - 1)
 	var orders []models.Order
-	rows, err := pool.Query(ctx, sqlQuery, recordsLimit, offest)
+	rows, err := o.pool.Query(ctx, sqlQuery, recordsLimit, offest)
 	if err != nil {
 		return nil, err
 	}
