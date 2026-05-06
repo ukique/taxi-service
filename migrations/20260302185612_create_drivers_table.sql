@@ -1,12 +1,16 @@
 -- +goose Up
+CREATE TYPE driverStatus AS ENUM (
+    'driving',
+    'searching',
+    'offline'
+);
 CREATE TABLE drivers
 (
     id         BIGSERIAL PRIMARY KEY,
-    username   VARCHAR(24)             NOT NULL UNIQUE,
-    password   TEXT                    NOT NULL,
-    email      VARCHAR(255)            NOT NULL UNIQUE,
-    status     BOOLEAN                 NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW() NOT NULL
+    username   VARCHAR(24)                    NOT NULL UNIQUE,
+    status     driverStatus DEFAULT 'offline' NOT NULL,
+    created_at TIMESTAMP                      NOT NULL
 );
 -- +goose Down
-SELECT 'down SQL query';
+DROP TABLE drivers CASCADE;
+DROP TYPE driverStatus;

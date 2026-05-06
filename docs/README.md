@@ -12,3 +12,5 @@ docker run -d \
 
 # Message Broker Structure
 #### example of Message Broker Structure you can read [here](https://github.com/ukique/taxi-service/blob/main/docs/examples/message_broker_structure.md)
+
+go install github.com/pressly/goose/v3/cmd/goose@latest
