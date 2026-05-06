@@ -20,6 +20,5 @@ func (h *Handler) WebSocketHandler(c *gin.Context) {
 	}
 	h.hub.register <- client
 
-	go client.ReadPump()
-	client.WritePump()
+	go client.WritePump()
 }

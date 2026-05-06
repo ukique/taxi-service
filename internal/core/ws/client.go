@@ -14,20 +14,25 @@ import (
 type OrderRepository interface {
 	GetOrdersData(ctx context.Context, pageID int) ([]models.Order, error)
 }
+type DriverRepository interface {
+	GetDriversData(ctx context.Context, pageID int) ([]models.Driver, error)
+}
 type Client struct {
-	conn            *websocket.Conn
-	send            chan []byte
-	hub             *Hub
-	orderRepository OrderRepository
+	conn             *websocket.Conn
+	send             chan []byte
+	hub              *Hub
+	orderRepository  OrderRepository
+	driverRepository DriverRepository
 }
 type Handler struct {
-	pool            *pgxpool.Pool
-	hub             *Hub
-	orderRepository OrderRepository
+	pool             *pgxpool.Pool
+	hub              *Hub
+	orderRepository  OrderRepository
+	driverRepository DriverRepository
 }
 
-func NewWSHandler(pool *pgxpool.Pool, hub *Hub, service OrderRepository) *Handler {
-	return &Handler{pool: pool, hub: hub, orderRepository: service}
+func NewWSHandler(pool *pgxpool.Pool, hub *Hub, orderRepository OrderRepository, driverRepository DriverRepository) *Handler {
+	return &Handler{pool: pool, hub: hub, orderRepository: orderRepository, driverRepository: driverRepository}
 }
 
 var upgrader = websocket.Upgrader{
@@ -52,13 +57,21 @@ func (c *Client) ReadPump() {
 		}
 		switch message.Type {
 		case "orders":
-			order, err := json.Marshal(message)
+			ordersData, err := c.orderRepository.GetOrdersData(context.Background(), message.Page)
+			if err != nil {
+				return
+			}
+			order, err := json.Marshal(ordersData)
 			if err != nil {
 				break
 			}
 			c.hub.broadcast <- order
 		case "drivers":
-			drivers, err := json.Marshal(message)
+			driverData, err := c.driverRepository.GetDriversData(context.Background(), message.Page)
+			if err != nil {
+				return
+			}
+			drivers, err := json.Marshal(driverData)
 			if err != nil {
 				break
 			}
@@ -80,20 +93,17 @@ func (c *Client) WritePump() {
 					return
 				}
 			}
-			var ordersMessage models.Message
-			err := json.Unmarshal(orders, &ordersMessage)
-			if err != nil {
+			if err := c.conn.WriteJSON(orders); err != nil {
 				return
 			}
-			ordersData, err := c.orderRepository.GetOrdersData(context.Background(), ordersMessage.Page)
-			if err != nil {
-				return
+		case drivers, ok := <-c.send:
+			if !ok {
+				if err := c.conn.WriteMessage(websocket.CloseMessage, []byte{}); err != nil {
+					log.Println("failed to close send connection", err)
+					return
+				}
 			}
-			if err := c.conn.WriteJSON(ordersData); err != nil {
-				return
-			}
-			log.Println(ordersMessage.Type)
-			if err != nil {
+			if err := c.conn.WriteJSON(drivers); err != nil {
 				return
 			}
 		}

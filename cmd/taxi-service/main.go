@@ -11,6 +11,7 @@ import (
 	"github.com/ukique/taxi-service/internal/core/database"
 	"github.com/ukique/taxi-service/internal/core/rabbitmq"
 	"github.com/ukique/taxi-service/internal/core/ws"
+	driverRepository "github.com/ukique/taxi-service/internal/features/driver/repository"
 	driverTransport "github.com/ukique/taxi-service/internal/features/driver/transport"
 	"github.com/ukique/taxi-service/internal/features/order/repository"
 	userTransport "github.com/ukique/taxi-service/internal/features/user/transport"
@@ -86,11 +87,12 @@ func main() {
 	driverHandler := driverTransport.NewDriverHandler(pool, secretKey)
 	refreshTokenHandler := userTransport.NewRefreshHandler(pool, secretKey)
 	orderRepository := repository.NewOrderRepository(pool)
+	driverRepository := driverRepository.NewDriversRepository(pool)
 
 	hub := ws.NewHub()
 	go hub.Run()
 
-	websocket := ws.NewWSHandler(pool, hub, orderRepository)
+	websocket := ws.NewWSHandler(pool, hub, orderRepository, driverRepository)
 	//GIN setup
 	router := gin.Default()
 	router.Use(cors.New(cors.Config{
@@ -106,7 +108,6 @@ func main() {
 	router.POST("/users/authentication", authUserHandler.AuthenticationUserHandler)
 	router.POST("/refreshToken", refreshTokenHandler.RefreshTokenHandler)
 	//drivers
-	//router.GET("/drivers", driverHandler.GetDriversPageHandler)
 	router.POST("/drivers/create", driverHandler.CreateDriverHandler)
 	router.DELETE("/drivers/:id", driverHandler.DeleteDriverHandler)
 	router.PATCH("/drivers/:id/username", driverHandler.ChangeDriverNameHandler)

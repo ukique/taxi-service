@@ -1,7 +1,5 @@
 package ws
 
-import "log"
-
 type Hub struct {
 	clients    map[*Client]bool
 	broadcast  chan []byte
@@ -23,12 +21,10 @@ func (h *Hub) Run() {
 		select {
 		case client := <-h.register:
 			h.clients[client] = true
-			log.Println("client registered")
 		case client := <-h.unregister:
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
 				close(client.send)
-				log.Println("client unregistered")
 			}
 		case message := <-h.broadcast:
 			for client := range h.clients {

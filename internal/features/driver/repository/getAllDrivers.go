@@ -7,7 +7,14 @@ import (
 	"github.com/ukique/taxi-service/internal/models"
 )
 
-func GetDriversData(ctx context.Context, pool *pgxpool.Pool, pageID int) ([]models.Driver, error) {
+type DriversRepository struct {
+	pool *pgxpool.Pool
+}
+
+func NewDriversRepository(pool *pgxpool.Pool) *DriversRepository {
+	return &DriversRepository{pool: pool}
+}
+func (d DriversRepository) GetDriversData(ctx context.Context, pageID int) ([]models.Driver, error) {
 	sqlQuery := `
   SELECT id,username, status FROM drivers
   ORDER BY id DESC 
@@ -16,7 +23,7 @@ func GetDriversData(ctx context.Context, pool *pgxpool.Pool, pageID int) ([]mode
 	recordsLimit := 50
 	offest := recordsLimit * (pageID - 1)
 	var drivers []models.Driver
-	rows, err := pool.Query(ctx, sqlQuery, recordsLimit, offest)
+	rows, err := d.pool.Query(ctx, sqlQuery, recordsLimit, offest)
 	if err != nil {
 		return nil, err
 	}
@@ -34,6 +41,3 @@ func GetDriversData(ctx context.Context, pool *pgxpool.Pool, pageID int) ([]mode
 	}
 	return drivers, nil
 }
-
-//To send orders, drivers and locations to the front-end, use WebSocket.
-//after success rest request , i will just send by ws for all clients (i use hub) that they must upd a page, is it good idea???? (p.s real p
