@@ -86,24 +86,14 @@ func (c *Client) WritePump() {
 	}()
 	for {
 		select {
-		case orders, ok := <-c.send:
+		case message, ok := <-c.send:
 			if !ok {
 				if err := c.conn.WriteMessage(websocket.CloseMessage, []byte{}); err != nil {
 					log.Println("failed to close send connection", err)
 					return
 				}
 			}
-			if err := c.conn.WriteJSON(orders); err != nil {
-				return
-			}
-		case drivers, ok := <-c.send:
-			if !ok {
-				if err := c.conn.WriteMessage(websocket.CloseMessage, []byte{}); err != nil {
-					log.Println("failed to close send connection", err)
-					return
-				}
-			}
-			if err := c.conn.WriteJSON(drivers); err != nil {
+			if err := c.conn.WriteMessage(websocket.TextMessage, message); err != nil {
 				return
 			}
 		}
