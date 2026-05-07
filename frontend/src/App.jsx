@@ -5,22 +5,21 @@ import Drivers from "./pages/driversPage/driversPage.jsx";
 import Registration from "./pages/registerPage/registerPage.jsx";
 import Authentication from "./pages/authenticationPage/authenticationPage.jsx";
 import ProtectedRouter from "./utils/protectedRouter.jsx";
+import { WSProvider } from './utils/WSProvider';
 
 function App() {
-
     return (
-        <>
+        <WSProvider>
             <Routes>
                 <Route path="/users/register" element={<Registration/>}/>
                 <Route path="/users/authentication" element={<Authentication/>}/>
-
                 <Route element={<ProtectedRouter/>}>
                     <Route path="/" element={<Navigate to="/orders"/>}/>
                     <Route path="/orders" element={<Orders/>}/>
                     <Route path="/drivers" element={<Drivers/>}/>
                 </Route>
             </Routes>
-        </>
+        </WSProvider>
     )
 }
 

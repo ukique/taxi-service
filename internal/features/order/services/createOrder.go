@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/ukique/taxi-service/internal/features/driver/repository"
@@ -18,15 +19,15 @@ func CreateOrder(ctx context.Context, pool *pgxpool.Pool) error {
 	const orderStatus = models.OrderStatus("created")
 
 	sqlQuery := `
-	INSERT INTO orders(driver_id,status)
-	VALUES ($1, $2)
+	INSERT INTO orders(driver_id,status,created_at)
+	VALUES ($1, $2, $3)
 `
 	driverStatus := "driving"
 	// unlock driver in db after too (check SearchAvailableDriver func)
 	if err := repository.ChangeDriverStatus(ctx, pool, driverID, driverStatus); err != nil {
 		return fmt.Errorf("fail to change driver status: %w", err)
 	}
-	_, err = pool.Exec(ctx, sqlQuery, driverID, orderStatus)
+	_, err = pool.Exec(ctx, sqlQuery, driverID, orderStatus, time.Now())
 	if err != nil {
 		return fmt.Errorf("fail to insert into orders: %w", err)
 	}

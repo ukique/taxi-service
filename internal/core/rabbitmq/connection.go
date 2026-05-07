@@ -28,7 +28,7 @@ func CreateChannel(brokerConn *amqp.Connection) (*amqp.Channel, error) {
 func QueueDeclareOrdersCoordinates(ch *amqp.Channel) (amqp.Queue, error) {
 	queue, err := ch.QueueDeclare(
 		"orders_coordinates", // name
-		false,                // durable
+		true,                 // durable
 		false,                // autoDelete
 		false,                // exclusive
 		false,                //noWait
