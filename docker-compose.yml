@@ -2,7 +2,7 @@ services:
   db:
     image: postgres
     volumes:
-      - postgres_data:/var/lib/postgresql
+      - postgres_data:/var/lib/postgresql/data
     container_name: taxi-service-db
     ports:
       - "5435:5432"
