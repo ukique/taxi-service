@@ -1,18 +1,20 @@
 package ws
 
 type Hub struct {
-	clients    map[*Client]bool
-	broadcast  chan []byte
-	register   chan *Client
-	unregister chan *Client
+	clients          map[*Client]bool
+	register         chan *Client
+	unregister       chan *Client
+	broadcastOrders  chan []byte
+	broadcastDrivers chan []byte
 }
 
 func NewHub() *Hub {
 	return &Hub{
-		clients:    make(map[*Client]bool),
-		broadcast:  make(chan []byte),
-		register:   make(chan *Client),
-		unregister: make(chan *Client),
+		clients:          make(map[*Client]bool),
+		register:         make(chan *Client),
+		unregister:       make(chan *Client),
+		broadcastOrders:  make(chan []byte),
+		broadcastDrivers: make(chan []byte),
 	}
 }
 
@@ -26,15 +28,29 @@ func (h *Hub) Run() {
 				delete(h.clients, client)
 				close(client.send)
 			}
-		case message := <-h.broadcast:
+		case orders := <-h.broadcastOrders:
 			for client := range h.clients {
-				select {
-				case client.send <- message:
-				default:
-					close(client.send)
-					delete(h.clients, client)
+				if client.subscribeType == "subscribe_orders" {
+					select {
+					case client.send <- orders:
+					default:
+						close(client.send)
+						delete(h.clients, client)
+					}
+				}
+			}
+		case drivers := <-h.broadcastDrivers:
+			for client := range h.clients {
+				if client.subscribeType == "subscribe_drivers" {
+					select {
+					case client.send <- drivers:
+					default:
+						close(client.send)
+						delete(h.clients, client)
+					}
 				}
 			}
 		}
 	}
+
 }

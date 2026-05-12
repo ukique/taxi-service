@@ -23,6 +23,7 @@ type Client struct {
 	hub              *Hub
 	orderRepository  OrderRepository
 	driverRepository DriverRepository
+	subscribeType    string
 }
 type Handler struct {
 	pool             *pgxpool.Pool
@@ -49,7 +50,7 @@ func (c *Client) ReadPump() {
 		c.conn.Close()
 	}()
 	for {
-		var message models.Message
+		var message models.IncomingMessage
 		err := c.conn.ReadJSON(&message)
 		if err != nil {
 			log.Println("failed to readMessage", err)
@@ -61,21 +62,29 @@ func (c *Client) ReadPump() {
 			if err != nil {
 				return
 			}
-			order, err := json.Marshal(ordersData)
-			if err != nil {
-				break
+			ordersBody := models.OutgoingOrdersMessage{
+				Type: "orders",
+				Data: ordersData,
 			}
-			c.hub.broadcast <- order
+			orders, err := json.Marshal(ordersBody)
+			if err != nil {
+				return
+			}
+			c.hub.broadcastOrders <- orders
 		case "drivers":
 			driverData, err := c.driverRepository.GetDriversData(context.Background(), message.Page)
 			if err != nil {
 				return
 			}
-			drivers, err := json.Marshal(driverData)
-			if err != nil {
-				break
+			driversBody := models.OutgoingDriversMessage{
+				Type: "drivers",
+				Data: driverData,
 			}
-			c.hub.broadcast <- drivers
+			drivers, err := json.Marshal(driversBody)
+			if err != nil {
+				return
+			}
+			c.hub.broadcastDrivers <- drivers
 		}
 	}
 }

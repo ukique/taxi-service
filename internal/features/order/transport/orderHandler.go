@@ -39,7 +39,7 @@ func (h *Handler) CreateOrderHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "fail to create Order"})
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{"message": "order created!"})
+	// send data to everyone
 }
 
 func (h *Handler) CompleteOrderHandler(c *gin.Context) {

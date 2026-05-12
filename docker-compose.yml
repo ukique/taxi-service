@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres
+    image: postgres:17
     volumes:
       - postgres_data:/var/lib/postgresql/data
     container_name: taxi-service-db
