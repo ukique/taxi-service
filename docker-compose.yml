@@ -1,23 +1,27 @@
 services:
   db:
     image: postgres:17
+    env_file:
+       - .env
     volumes:
       - postgres_data:/var/lib/postgresql/data
     container_name: taxi-service-db
     ports:
-      - "5435:5432"
+      - "${POSTGRES_PORT}:5432"
     environment:
-      POSTGRES_USER: ukique
-      POSTGRES_PASSWORD: taxi
-      POSTGRES_DB: taxi_service_db
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_DB: "${POSTGRES_DB}"
   broker:
     image: rabbitmq:4-management
+    env_file:
+      - .env
     container_name: taxi-service-rabbitmq
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "${RABBITMQ_PORT}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT}:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: ukique
-      RABBITMQ_DEFAULT_PASS: taxi
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_DEFAULT_USER}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_DEFAULT_PASS}"
 volumes:
   postgres_data:
