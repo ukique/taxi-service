@@ -1,5 +1,7 @@
 .order-status-id{
-    text-decoration: none;
+    color: #634fd6;
+    cursor: pointer;
+    text-decoration: underline;
 }
 
 .orders-table{

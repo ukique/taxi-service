@@ -1,6 +1,7 @@
 import "./allOrdersTable.css"
 import {useCallback, useState} from "react";
 import {useSubscription} from "../../hooks/useSubscription";
+import {Link} from "react-router-dom";
 
 function AllOrdersTable() {
     const [orders, setOrders] = useState([]);
@@ -48,7 +49,10 @@ function AllOrdersTable() {
                         ) : (
                             filteredOrders.toReversed().map(order => (
                                 <tr key={order.id}>
-                                    <td><a className="order-status-id" href={`/orders/page/${order.id}`}>{order.id}</a>
+                                    <td>
+                                        <Link className="order-status-id" to={`/orders/page/${order.id}`}>
+                                            {order.id}
+                                        </Link>
                                     </td>
                                     <td>{order.driver_id}</td>
                                     <td>{order.status}</td>
