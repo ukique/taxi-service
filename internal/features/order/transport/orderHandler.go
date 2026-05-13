@@ -1,24 +1,33 @@
 package transport
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/ukique/taxi-service/internal/core/ws"
 	driver "github.com/ukique/taxi-service/internal/features/driver/repository"
 	order "github.com/ukique/taxi-service/internal/features/order/repository"
 	"github.com/ukique/taxi-service/internal/features/order/services"
 	"github.com/ukique/taxi-service/internal/middleware"
+	"github.com/ukique/taxi-service/internal/models"
 )
 
 type Handler struct {
-	pool      *pgxpool.Pool
-	secretKey string
+	pool            *pgxpool.Pool
+	secretKey       string
+	hub             Broadcaster
+	orderRepository ws.OrderRepository
 }
 
-func NewOrderHandler(pool *pgxpool.Pool, secretKey string) *Handler {
-	return &Handler{pool: pool, secretKey: secretKey}
+type Broadcaster interface {
+	SendToBroadcast(payload []byte)
+}
+
+func NewOrderHandler(pool *pgxpool.Pool, secretKey string, hub Broadcaster, orderRepository ws.OrderRepository) *Handler {
+	return &Handler{pool: pool, secretKey: secretKey, hub: hub, orderRepository: orderRepository}
 }
 
 func (h *Handler) CreateOrderHandler(c *gin.Context) {
@@ -39,7 +48,23 @@ func (h *Handler) CreateOrderHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "fail to create Order"})
 		return
 	}
-	// send data to everyone
+	c.JSON(http.StatusOK, gin.H{
+		"ok":      true,
+		"message": "order created!",
+	})
+	ordersData, err := h.orderRepository.GetOrdersData(c.Request.Context(), 1)
+	if err != nil {
+		return
+	}
+	ordersBody := models.OutgoingMessage[[]models.Order]{
+		Type: "orders",
+		Data: ordersData,
+	}
+	orders, err := json.Marshal(ordersBody)
+	if err != nil {
+		return
+	}
+	h.hub.SendToBroadcast(orders)
 }
 
 func (h *Handler) CompleteOrderHandler(c *gin.Context) {
@@ -85,5 +110,4 @@ func (h *Handler) CompleteOrderHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "fail to update order"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "order completed!"})
 }

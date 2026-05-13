@@ -11,7 +11,7 @@ import (
 	"github.com/ukique/taxi-service/internal/core/database"
 	"github.com/ukique/taxi-service/internal/core/rabbitmq"
 	"github.com/ukique/taxi-service/internal/core/ws"
-	driverRepository "github.com/ukique/taxi-service/internal/features/driver/repository"
+	driversRepository "github.com/ukique/taxi-service/internal/features/driver/repository"
 	driverTransport "github.com/ukique/taxi-service/internal/features/driver/transport"
 	"github.com/ukique/taxi-service/internal/features/order/repository"
 	userTransport "github.com/ukique/taxi-service/internal/features/user/transport"
@@ -81,16 +81,17 @@ func main() {
 			os.Exit(1)
 		}
 	}()
-	orderHandler := orderTransport.NewOrderHandler(pool, secretKey)
-	userHandler := userTransport.NewUserRegisterHandler(pool)
-	authUserHandler := userTransport.NewAuthUserHandler(pool, secretKey)
-	driverHandler := driverTransport.NewDriverHandler(pool, secretKey)
-	refreshTokenHandler := userTransport.NewRefreshHandler(pool, secretKey)
-	orderRepository := repository.NewOrderRepository(pool)
-	driverRepository := driverRepository.NewDriversRepository(pool)
 
+	//Run Hub for ws connections
 	hub := ws.NewHub()
 	go hub.Run()
+	orderRepository := repository.NewOrderRepository(pool)
+	driverRepository := driversRepository.NewDriversRepository(pool)
+	userHandler := userTransport.NewUserRegisterHandler(pool)
+	authUserHandler := userTransport.NewAuthUserHandler(pool, secretKey)
+	driverHandler := driverTransport.NewDriverHandler(pool, secretKey, hub, driverRepository)
+	orderHandler := orderTransport.NewOrderHandler(pool, secretKey, hub, orderRepository)
+	refreshTokenHandler := userTransport.NewRefreshHandler(pool, secretKey)
 
 	websocket := ws.NewWSHandler(pool, hub, orderRepository, driverRepository)
 	//GIN setup

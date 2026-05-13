@@ -1,7 +1,7 @@
-import {useEffect, useState} from "react"
+import {useCallback, useState} from "react"
 import "./allDrivers.css"
 import {refreshAccessToken} from "../../api/authApi.js";
-import axios from "axios";
+import {useSubscription} from "../../hooks/useSubscription.js";
 
 function AllDriversTable() {
     const [drivers, setDrivers] = useState([])
@@ -19,20 +19,16 @@ function AllDriversTable() {
     const [nameForm, setNameForm] = useState({id: "", username: ""})
     const [deleteForm, setDeleteForm] = useState({id: ""})
 
-    useEffect(() => {
-       const load = async () =>{
-           try {
-               const res = await axios.get("http://localhost:8080/drivers",{
-                   credentials: "include"
-               });
+    const handleMessage = useCallback((data) => {
+        if (data.type === "drivers") {
+            setDrivers(data.data);
+        }
+    }, []);
 
-           } catch (error){
-               setDrivers([]);
-           }
-
-       };
-       load();
-    }, [])
+    useSubscription({
+        subscribeMsg:   { type: "subscribe_drivers", page: 1 },
+        onMessage: handleMessage,
+    });
 
     const handlerFilterChange = (event) => setFilterText(event.target.value)
 

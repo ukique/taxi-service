@@ -4,13 +4,8 @@ type IncomingMessage struct {
 	Type string `json:"type"`
 	Page int    `json:"page"`
 }
-
-type OutgoingOrdersMessage struct {
-	Type string  `json:"type"`
-	Data []Order `json:"data"`
-}
-
-type OutgoingDriversMessage struct {
-	Type string   `json:"type"`
-	Data []Driver `json:"data"`
+	
+type OutgoingMessage[T any] struct {
+	Type string `json:"type"`
+	Data T      `json:"data"`
 }

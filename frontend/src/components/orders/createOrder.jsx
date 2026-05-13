@@ -33,7 +33,7 @@ function CreateOrderButton() {
                 setError(result.message)
             }
         } catch (err) {
-            setError("Something went wrong, please try again.")
+            setError("Something went wrong, please try again." + err)
         } finally {
             setIsLoading(false)
         }

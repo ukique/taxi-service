@@ -57,12 +57,13 @@ func (c *Client) ReadPump() {
 			break
 		}
 		switch message.Type {
-		case "orders":
+		case "subscribe_orders":
+			c.subscribeType = "orders"
 			ordersData, err := c.orderRepository.GetOrdersData(context.Background(), message.Page)
 			if err != nil {
 				return
 			}
-			ordersBody := models.OutgoingOrdersMessage{
+			ordersBody := models.OutgoingMessage[[]models.Order]{
 				Type: "orders",
 				Data: ordersData,
 			}
@@ -70,13 +71,14 @@ func (c *Client) ReadPump() {
 			if err != nil {
 				return
 			}
-			c.hub.broadcastOrders <- orders
-		case "drivers":
+			c.send <- orders
+		case "subscribe_drivers":
+			c.subscribeType = "drivers"
 			driverData, err := c.driverRepository.GetDriversData(context.Background(), message.Page)
 			if err != nil {
 				return
 			}
-			driversBody := models.OutgoingDriversMessage{
+			driversBody := models.OutgoingMessage[[]models.Driver]{
 				Type: "drivers",
 				Data: driverData,
 			}
@@ -84,7 +86,7 @@ func (c *Client) ReadPump() {
 			if err != nil {
 				return
 			}
-			c.hub.broadcastDrivers <- drivers
+			c.send <- drivers
 		}
 	}
 }

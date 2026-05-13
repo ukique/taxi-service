@@ -1,6 +1,7 @@
 package transport
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -41,6 +42,21 @@ func (h *DriverHandler) CreateDriverHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "fail to register driver"})
 		return
 	}
-
-	c.JSON(http.StatusCreated, gin.H{"message": "driver created!"})
+	c.JSON(http.StatusOK, gin.H{
+		"ok":      true,
+		"message": "driver created!",
+	})
+	driversData, err := h.driverRepository.GetDriversData(c.Request.Context(), 1)
+	if err != nil {
+		return
+	}
+	ordersBody := models.OutgoingMessage[[]models.Driver]{
+		Type: "drivers",
+		Data: driversData,
+	}
+	drivers, err := json.Marshal(ordersBody)
+	if err != nil {
+		return
+	}
+	h.hub.SendToBroadcast(drivers)
 }

@@ -7,18 +7,22 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/ukique/taxi-service/internal/core/ws"
 	"github.com/ukique/taxi-service/internal/features/driver/repository"
+	orderTransport "github.com/ukique/taxi-service/internal/features/order/transport"
 	"github.com/ukique/taxi-service/internal/middleware"
 	"github.com/ukique/taxi-service/internal/models"
 )
 
 type DriverHandler struct {
-	pool      *pgxpool.Pool
-	secretKey string
+	pool             *pgxpool.Pool
+	secretKey        string
+	hub              orderTransport.Broadcaster
+	driverRepository ws.DriverRepository
 }
 
-func NewDriverHandler(pool *pgxpool.Pool, secretKey string) *DriverHandler {
-	return &DriverHandler{pool: pool, secretKey: secretKey}
+func NewDriverHandler(pool *pgxpool.Pool, secretKey string, hub orderTransport.Broadcaster, driveRepository ws.DriverRepository) *DriverHandler {
+	return &DriverHandler{pool: pool, secretKey: secretKey, hub: hub, driverRepository: driveRepository}
 }
 
 func (h *DriverHandler) ChangeDriverNameHandler(c *gin.Context) {

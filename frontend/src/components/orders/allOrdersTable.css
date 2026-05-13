@@ -1,4 +1,39 @@
 .order-status-id{
     text-decoration: none;
-    
 }
+
+.orders-table{
+    margin-left: 100px;
+    block-size: 50px;
+}
+.orders-table table, th, td {
+    border-style: solid;
+    border-color: #c6c6c6;
+    border-collapse: collapse;
+    background-color: #f8f6f6;
+}
+
+.orders-table table {
+    margin-top: 20px;
+    font-family: "DM Sans", sans-serif;
+    width: 70%;
+    min-width: 500px;
+    table-layout: fixed;
+}
+.orders-table th{
+    padding: 15px;
+}
+.orders-table td{
+    padding: 10px;
+}
+.orders-table th:nth-child(1),
+.orders-table td:nth-child(1) { width: 20%; }  /* ID */
+
+.orders-table th:nth-child(2),
+.orders-table td:nth-child(2) { width: 25%; }  /* Driver ID */
+
+.orders-table th:nth-child(3),
+.orders-table td:nth-child(3) { width: 30%; }  /* Status */
+
+.orders-table th:nth-child(4),
+.orders-table td:nth-child(4) { width: 45%; }  /* Created_At */
