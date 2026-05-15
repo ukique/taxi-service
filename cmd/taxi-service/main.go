@@ -43,44 +43,26 @@ func main() {
 		os.Exit(1)
 	}
 
-	// create *amqp.Connection for RabbitMQ features
-	brokerConn, err := rabbitmq.CreateRabbitMQConnection(rabbitmqURL)
+	_, err = rabbitmq.NewBroker(rabbitmqURL) //must be broker
 	if err != nil {
-		log.Println("fail to connect to RabbitMQ:", err)
-		os.Exit(1)
+		log.Println("failed to create NewBroker:", err)
 	}
-	defer func() {
-		if err := brokerConn.Close(); err != nil {
-			log.Println("fail to close RabbitMQ connection:", err)
-		}
-	}()
 
-	// create *amqp.Channel (broker channel)
-	brokerChannel, err := rabbitmq.CreateChannel(brokerConn)
-	if err != nil {
-		log.Println("fail to create RabbitMQ channel:", err)
-		os.Exit(1)
-	}
-	defer func() {
-		if err := brokerChannel.Close(); err != nil {
-			log.Println("fail to close RabbitMQ channel:", err)
+	/*
+		// create Queue Declare for Orders Coordinates *amqp.Queue (broker queue)
+		orderCoordinatesQueue, err := rabbitmq.QueueDeclareOrdersCoordinates(brokerChannel)
+		if err != nil {
+			log.Println("fail to create Queue Declare Orders Coordinates:", err)
 			os.Exit(1)
 		}
-	}()
 
-	// create Queue Declare for Orders Coordinates *amqp.Queue (broker queue)
-	orderCoordinatesQueue, err := rabbitmq.QueueDeclareOrdersCoordinates(brokerChannel)
-	if err != nil {
-		log.Println("fail to create Queue Declare Orders Coordinates:", err)
-		os.Exit(1)
-	}
-
-	go func() {
-		if err := rabbitmq.LocationDatabaseConsumer(ctx, pool, brokerChannel, orderCoordinatesQueue); err != nil {
-			log.Println("consume error:", err)
-			os.Exit(1)
-		}
-	}()
+		go func() {
+			if err := rabbitmq.LocationDatabaseConsumer(ctx, pool, brokerChannel, orderCoordinatesQueue); err != nil {
+				log.Println("consume error:", err)
+				os.Exit(1)
+			}
+		}()
+	*/
 
 	//Run Hub for ws connections
 	hub := ws.NewHub()
