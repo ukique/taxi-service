@@ -43,36 +43,40 @@ func main() {
 		os.Exit(1)
 	}
 
-	_, err = rabbitmq.NewBroker(rabbitmqURL) //must be broker
+	broker, err := rabbitmq.NewBroker(rabbitmqURL)
 	if err != nil {
 		log.Println("failed to create NewBroker:", err)
 	}
-
-	/*
-		// create Queue Declare for Orders Coordinates *amqp.Queue (broker queue)
-		orderCoordinatesQueue, err := rabbitmq.QueueDeclareOrdersCoordinates(brokerChannel)
-		if err != nil {
-			log.Println("fail to create Queue Declare Orders Coordinates:", err)
-			os.Exit(1)
+	defer func() {
+		if err := broker.Close(); err != nil {
+			log.Printf("failed to close broker: %v", err)
 		}
+	}()
 
-		go func() {
-			if err := rabbitmq.LocationDatabaseConsumer(ctx, pool, brokerChannel, orderCoordinatesQueue); err != nil {
-				log.Println("consume error:", err)
-				os.Exit(1)
-			}
-		}()
-	*/
+	orderCreatedConfig := rabbitmq.QueueConfig{
+		Name:       "order.created",
+		Durable:    true,
+		AutoDelete: false,
+		Exclusive:  false,
+		NoWait:     false,
+		Args:       nil,
+	}
+	_, err = broker.DeclareQueue(orderCreatedConfig)
+	if err != nil {
+		log.Println("fail to Declare Queue order.created :", err)
+		os.Exit(1)
+	}
 
 	//Run Hub for ws connections
 	hub := ws.NewHub()
 	go hub.Run()
+
 	orderRepository := repository.NewOrderRepository(pool)
 	driverRepository := driversRepository.NewDriversRepository(pool)
 	userHandler := userTransport.NewUserRegisterHandler(pool)
 	authUserHandler := userTransport.NewAuthUserHandler(pool, secretKey)
 	driverHandler := driverTransport.NewDriverHandler(pool, secretKey, hub, driverRepository)
-	orderHandler := orderTransport.NewOrderHandler(pool, secretKey, hub, orderRepository)
+	orderHandler := orderTransport.NewOrderHandler(pool, secretKey, hub, orderRepository, broker)
 	refreshTokenHandler := userTransport.NewRefreshHandler(pool, secretKey)
 
 	websocket := ws.NewWSHandler(pool, hub, orderRepository, driverRepository)

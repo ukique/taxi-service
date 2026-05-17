@@ -30,3 +30,16 @@ func NewBroker(url string) (*Broker, error) {
 		ch:   ch,
 	}, nil
 }
+func (b *Broker) Close() error {
+	if b.ch != nil {
+		if err := b.ch.Close(); err != nil {
+			return fmt.Errorf("failed to close RabbitMQ channel: %w", err)
+		}
+	}
+	if b.conn != nil {
+		if err := b.conn.Close(); err != nil {
+			return fmt.Errorf("failed to close RabbitMQ connection: %w", err)
+		}
+	}
+	return nil
+}
