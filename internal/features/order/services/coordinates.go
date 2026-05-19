@@ -1,16 +1,8 @@
 package services
 
 import (
-	"context"
-	"encoding/json"
-	"log"
 	"math/rand"
 	"time"
-
-	"github.com/jackc/pgx/v5/pgxpool"
-	amqp "github.com/rabbitmq/amqp091-go"
-	orderFeatures "github.com/ukique/taxi-service/internal/features/order/repository"
-	"github.com/ukique/taxi-service/internal/models"
 )
 
 // GenerateCoordinates generate random float64 coordinates
@@ -20,49 +12,4 @@ func GenerateCoordinates() (float64, float64, time.Time) {
 	driverLon := rand.Float64()*360 - 180
 	generatedTime := time.Now()
 	return driverLat, driverLon, generatedTime
-}
-
-// SendCoordinates sends to the message broker messages of the following structure
-// Example structure you can check in docs/examples/message_broker_structure.md
-func SendCoordinates(ctx context.Context, pool *pgxpool.Pool, ch *amqp.Channel, orderCoordinatesQueue amqp.Queue, order models.Order) error {
-
-	var coordinates models.Coordinates
-	coordinates.Lat, coordinates.Lon, coordinates.GeneratedTime = GenerateCoordinates()
-
-	order.Status = "in_progress"
-	err := orderFeatures.UpdateOrderStatus(ctx, pool, order.ID, "in_progress")
-	if err != nil {
-		log.Println("fail to change order status:", err)
-		return err
-	}
-
-	orderBody := models.OrderCoordinateEvent{
-		DriverID: order.DriverID,
-		Coordinates: models.Coordinates{
-			Lat:           coordinates.Lat,
-			Lon:           coordinates.Lon,
-			GeneratedTime: coordinates.GeneratedTime,
-		},
-		Order: models.Order{
-			ID:     order.ID,
-			Status: order.Status,
-		},
-	}
-
-	orderData, err := json.Marshal(orderBody)
-	if err != nil {
-		log.Println("fail to marshal orderBody:")
-		return err
-	}
-
-	return ch.Publish(
-		"",
-		orderCoordinatesQueue.Name,
-		false,
-		false,
-		amqp.Publishing{
-			ContentType: "application/json",
-			Body:        orderData,
-		},
-	)
 }

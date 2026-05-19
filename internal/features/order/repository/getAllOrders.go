@@ -3,17 +3,9 @@ package repository
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/ukique/taxi-service/internal/models"
 )
 
-type OrderRepository struct {
-	pool *pgxpool.Pool
-}
-
-func NewOrderRepository(pool *pgxpool.Pool) *OrderRepository {
-	return &OrderRepository{pool: pool}
-}
 func (o *OrderRepository) GetOrdersData(ctx context.Context, pageID int) ([]models.Order, error) {
 	sqlQuery := `
   SELECT id, driver_id, status, created_at FROM orders

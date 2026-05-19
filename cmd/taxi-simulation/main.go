@@ -2,20 +2,16 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"os"
-	"time"
 
 	"github.com/goccy/go-yaml"
 	"github.com/joho/godotenv"
-	"github.com/rabbitmq/amqp091-go"
 	"github.com/ukique/taxi-service/config"
 	"github.com/ukique/taxi-service/internal/core/database"
 	"github.com/ukique/taxi-service/internal/core/rabbitmq"
-	orderFeatures "github.com/ukique/taxi-service/internal/features/order/repository"
-	"github.com/ukique/taxi-service/internal/features/order/services"
-	"github.com/ukique/taxi-service/internal/models"
+	"github.com/ukique/taxi-service/internal/features/order"
+	"github.com/ukique/taxi-service/internal/features/order/repository"
 )
 
 func main() {
@@ -81,70 +77,11 @@ func main() {
 		NoWait:      false,
 		Args:        nil,
 	}
-	for {
-		err = broker.Consumer(orderCreatedConsumerConfig, func(delivery amqp091.Delivery) {
-
-			orderCoordinatesPublisherConfig := rabbitmq.PublisherConfig{
-				Exchange:  "",
-				Key:       "order.coordinates",
-				Mandatory: false,
-				Immediate: false, // (always false)
-			}
-
-			var order models.Order
-			if err := json.Unmarshal(delivery.Body, &order); err != nil {
-				log.Println("failed to unmarshal delivery.Body:", err)
-				delivery.Nack(false, false)
-				return
-			}
-			driverID := order.DriverID
-			order.Status = "in_progress"
-			err := orderFeatures.UpdateOrderStatus(context.Background(), pool, order.ID, "in_progress")
-			if err != nil {
-				log.Println("database: fail to change order status:", err)
-			}
-
-			var coordinates models.Coordinates
-			for i := 0; i < simulationData.Simulator.LocationUpdates; i++ {
-
-				coordinates.Lat, coordinates.Lon, _ = services.GenerateCoordinates()
-
-				event := models.OrderCoordinateEvent{
-					DriverID: driverID,
-					Coordinates: models.Coordinates{
-						Lat: coordinates.Lat,
-						Lon: coordinates.Lon,
-					},
-					Order: models.Order{
-						ID:     order.ID,
-						Status: order.Status,
-					},
-				}
-				log.Println("coordinates", coordinates.Lon, "", coordinates.Lat)
-				orderBody, err := json.Marshal(event)
-				if err != nil {
-					log.Println("failed to marshal OrderCoordinatesEvent: ", err)
-					return
-				}
-
-				message := amqp091.Publishing{
-					Body: orderBody,
-				}
-				orderCoordinatesPublisherConfig.Message = message
-				if err := broker.PublisherWithContext(context.Background(), orderCoordinatesPublisherConfig); err != nil {
-					log.Println("fail to publish to order.coordinates :", err)
-					delivery.Nack(false, true)
-					return
-				}
-				time.Sleep(simulationData.Simulator.TimeOut)
-			}
-			if err := delivery.Ack(false); err != nil {
-				log.Println("failed to send Ack message:", err)
-			}
-		})
-		if err != nil {
-			log.Println("failed to consume order.created:", err)
-		}
-
+	log.Println("simulation is working!")
+	orderRepository := repository.NewOrderRepository(pool)
+	orderConsumer := order.NewOrderConsumer(simulationData, broker, orderRepository)
+	err = broker.Consumer(orderCreatedConsumerConfig, orderConsumer.OrderCreatedConsumer)
+	if err != nil {
+		log.Println("failed to consume order.created:", err)
 	}
 }

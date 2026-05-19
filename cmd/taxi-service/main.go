@@ -13,6 +13,8 @@ import (
 	"github.com/ukique/taxi-service/internal/core/ws"
 	driversRepository "github.com/ukique/taxi-service/internal/features/driver/repository"
 	driverTransport "github.com/ukique/taxi-service/internal/features/driver/transport"
+	"github.com/ukique/taxi-service/internal/features/locations"
+	locationrepository "github.com/ukique/taxi-service/internal/features/locations/repository"
 	"github.com/ukique/taxi-service/internal/features/order/repository"
 	userTransport "github.com/ukique/taxi-service/internal/features/user/transport"
 
@@ -52,7 +54,9 @@ func main() {
 			log.Printf("failed to close broker: %v", err)
 		}
 	}()
+	locationRepository := locationrepository.NewLocationRepository(pool)
 
+	locationConsumer := locations.NewLocationConsumer(locationRepository)
 	orderCreatedConfig := rabbitmq.QueueConfig{
 		Name:       "order.created",
 		Durable:    true,
@@ -66,7 +70,17 @@ func main() {
 		log.Println("fail to Declare Queue order.created :", err)
 		os.Exit(1)
 	}
-
+	orderCoordinatesConsumerConfig := rabbitmq.ConsumerConfig{
+		QueueName:   "order.coordinates",
+		ConsumerTag: "",
+		AutoAck:     false,
+		Exclusive:   false,
+		NoLocal:     false,
+		NoWait:      false,
+		Args:        nil,
+	}
+	go broker.Consumer(orderCoordinatesConsumerConfig, locationConsumer.OrderLocationConsumer)
+	
 	//Run Hub for ws connections
 	hub := ws.NewHub()
 	go hub.Run()

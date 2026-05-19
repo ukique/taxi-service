@@ -2,7 +2,7 @@ services:
   db:
     image: postgres:17
     env_file:
-       - .env
+      - .env
     volumes:
       - postgres_data:/var/lib/postgresql/data
     container_name: taxi-service-db
