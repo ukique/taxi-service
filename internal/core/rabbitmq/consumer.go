@@ -31,7 +31,7 @@ func (b *Broker) Consumer(config ConsumerConfig, delivery func(delivery amqp.Del
 		return err
 	}
 	for message := range messages {
-		delivery(message)
+		go delivery(message)
 	}
 	return nil
 }

@@ -17,23 +17,29 @@ type OrderRepository interface {
 type DriverRepository interface {
 	GetDriversData(ctx context.Context, pageID int) ([]models.Driver, error)
 }
+type LocationRepository interface {
+	GetLastCoordinatesEvent(ctx context.Context, orderID int) (models.OrderCoordinateEvent, error)
+}
 type Client struct {
-	conn             *websocket.Conn
-	send             chan []byte
-	hub              *Hub
-	orderRepository  OrderRepository
-	driverRepository DriverRepository
-	subscribeType    string
+	conn               *websocket.Conn
+	send               chan []byte
+	hub                *Hub
+	orderRepository    OrderRepository
+	driverRepository   DriverRepository
+	locationRepository LocationRepository
+	subscribeType      string
+	subscribedPage     int
 }
 type Handler struct {
-	pool             *pgxpool.Pool
-	hub              *Hub
-	orderRepository  OrderRepository
-	driverRepository DriverRepository
+	pool               *pgxpool.Pool
+	hub                *Hub
+	orderRepository    OrderRepository
+	driverRepository   DriverRepository
+	locationRepository LocationRepository
 }
 
-func NewWSHandler(pool *pgxpool.Pool, hub *Hub, orderRepository OrderRepository, driverRepository DriverRepository) *Handler {
-	return &Handler{pool: pool, hub: hub, orderRepository: orderRepository, driverRepository: driverRepository}
+func NewWSHandler(pool *pgxpool.Pool, hub *Hub, orderRepository OrderRepository, driverRepository DriverRepository, locationRepository LocationRepository) *Handler {
+	return &Handler{pool: pool, hub: hub, orderRepository: orderRepository, driverRepository: driverRepository, locationRepository: locationRepository}
 }
 
 var upgrader = websocket.Upgrader{
@@ -87,6 +93,25 @@ func (c *Client) ReadPump() {
 				return
 			}
 			c.send <- drivers
+		case "subscribe_orderDetails":
+			c.subscribeType = "coordinates"
+			c.subscribedPage = message.Page //order_ID
+			lastEvent, err := c.locationRepository.GetLastCoordinatesEvent(context.Background(), c.subscribedPage)
+			if err != nil {
+				log.Println("failed to GetLastCoordinatesEvent", err)
+				return
+			}
+			eventBody := models.OutgoingMessage[models.OrderCoordinateEvent]{
+				Type: "coordinates",
+				Page: c.subscribedPage,
+				Data: lastEvent,
+			}
+			event, err := json.Marshal(eventBody)
+			if err != nil {
+				log.Println("failed to Marshal eventBody:", err)
+				return
+			}
+			c.send <- event
 		}
 	}
 }

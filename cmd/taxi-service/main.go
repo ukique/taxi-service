@@ -29,9 +29,22 @@ func main() {
 		}
 	}()
 
+	//Run Hub for ws connections
+	hub := ws.NewHub()
+	go hub.Run()
+
+	orderRepository := repository.NewOrderRepository(connection.Pool)
+	driverRepository := driversRepository.NewDriversRepository(connection.Pool)
+	userHandler := userTransport.NewUserRegisterHandler(connection.Pool)
+	authUserHandler := userTransport.NewAuthUserHandler(connection.Pool, connection.SecretKey)
+	driverHandler := driverTransport.NewDriverHandler(connection.Pool, connection.SecretKey, hub, driverRepository)
+	orderHandler := orderTransport.NewOrderHandler(connection.Pool, connection.SecretKey, hub, orderRepository, connection.Broker)
+	refreshTokenHandler := userTransport.NewRefreshHandler(connection.Pool, connection.SecretKey)
 	locationRepository := locationrepository.NewLocationRepository(connection.Pool)
 
-	locationConsumer := locations.NewLocationConsumer(locationRepository)
+	websocket := ws.NewWSHandler(connection.Pool, hub, orderRepository, driverRepository, locationRepository)
+
+	locationConsumer := locations.NewLocationConsumer(locationRepository, hub)
 	orderCreatedConfig := rabbitmq.QueueConfig{
 		Name:       "order.created",
 		Durable:    true,
@@ -55,20 +68,6 @@ func main() {
 		Args:        nil,
 	}
 	go connection.Broker.Consumer(orderCoordinatesConsumerConfig, locationConsumer.OrderLocationConsumer)
-
-	//Run Hub for ws connections
-	hub := ws.NewHub()
-	go hub.Run()
-
-	orderRepository := repository.NewOrderRepository(connection.Pool)
-	driverRepository := driversRepository.NewDriversRepository(connection.Pool)
-	userHandler := userTransport.NewUserRegisterHandler(connection.Pool)
-	authUserHandler := userTransport.NewAuthUserHandler(connection.Pool, connection.SecretKey)
-	driverHandler := driverTransport.NewDriverHandler(connection.Pool, connection.SecretKey, hub, driverRepository)
-	orderHandler := orderTransport.NewOrderHandler(connection.Pool, connection.SecretKey, hub, orderRepository, connection.Broker)
-	refreshTokenHandler := userTransport.NewRefreshHandler(connection.Pool, connection.SecretKey)
-
-	websocket := ws.NewWSHandler(connection.Pool, hub, orderRepository, driverRepository)
 	//GIN setup
 	router := gin.Default()
 	router.Use(cors.New(cors.Config{

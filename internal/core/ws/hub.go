@@ -48,13 +48,27 @@ func (h *Hub) Run() {
 				log.Println("message:", string(message))
 				continue
 			}
-			for client := range h.clients {
-				if client.subscribeType == messageBody.Type {
-					select {
-					case client.send <- message:
-					default:
-						close(client.send)
-						delete(h.clients, client)
+			switch messageBody.Type {
+			case "coordinates":
+				for client := range h.clients {
+					if client.subscribedPage == messageBody.Page {
+						select {
+						case client.send <- message:
+						default:
+							close(client.send)
+							delete(h.clients, client)
+						}
+					}
+				}
+			default:
+				for client := range h.clients {
+					if client.subscribeType == messageBody.Type {
+						select {
+						case client.send <- message:
+						default:
+							close(client.send)
+							delete(h.clients, client)
+						}
 					}
 				}
 			}

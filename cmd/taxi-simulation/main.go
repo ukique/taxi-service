@@ -60,8 +60,5 @@ func main() {
 	log.Println("simulation is working!")
 	orderRepository := repository.NewOrderRepository(connection.Pool)
 	orderConsumer := order.NewOrderConsumer(simulationData, connection.Broker, orderRepository)
-	err = connection.Broker.Consumer(orderCreatedConsumerConfig, orderConsumer.OrderCreatedConsumer)
-	if err != nil {
-		log.Println("failed to consume order.created:", err)
-	}
+	connection.Broker.Consumer(orderCreatedConsumerConfig, orderConsumer.OrderCreatedConsumer)
 }
