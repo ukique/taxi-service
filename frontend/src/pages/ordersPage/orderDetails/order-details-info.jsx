@@ -1,8 +1,24 @@
 import OrderDetailsHeader from "../../../components/orders/order-details-header/order-details-header.jsx";
 import "./order-details-info.css"
 import Header from "../../../components/header/header.jsx";
+import {useCallback, useState} from "react";
+import {useSubscription} from "../../../hooks/useSubscription";
+import {useParams} from "react-router-dom";
 
 function OrderDetailsInfo() {
+    const [coordinates, setCoordinates] = useState(null);
+    const {id} = useParams();
+
+    const handleMessage = useCallback((data) => {
+        if (data.type === "coordinates") {
+            setCoordinates(data.data);
+        }
+    }, []);
+
+    useSubscription({
+        subscribeMsg: {type: "subscribe_orderDetails", page: Number(id)},
+        onMessage: handleMessage,
+    });
 
     return (
         <>
@@ -13,11 +29,11 @@ function OrderDetailsInfo() {
                     <h1 id="current-location-info">Current Location</h1>
                     <div className="current-location-data">
                         <h1>Lat: </h1>
-                        <h2>-48.238709904837606</h2>
+                        <h2>{coordinates ? coordinates.lat : "—"}</h2>
                     </div>
                     <div className="current-location-data">
-                    <h1>Lon: </h1>
-                    <h2>-48.238709904837606</h2>
+                        <h1>Lon: </h1>
+                        <h2>{coordinates ? coordinates.lon : "—"}</h2>
                     </div>
                 </div>
                 <div className="order-details-data">
@@ -32,11 +48,19 @@ function OrderDetailsInfo() {
                             </tr>
                             </thead>
                             <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>1</td>
-                                <td>in_progress</td>
-                            </tr>
+                            {coordinates ? (
+                                <tr>
+                                    <td>{coordinates.DriverID}</td>
+                                    <td>{coordinates.id}</td>
+                                    <td>{coordinates.status || "—"}</td>
+                                </tr>
+                            ) : (
+                                <tr>
+                                    <td colSpan={3} style={{textAlign: "center", padding: "2rem", color: "#888"}}>
+                                        Waiting for order data...
+                                    </td>
+                                </tr>
+                            )}
                             </tbody>
                         </table>
                     </div>
