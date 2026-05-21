@@ -1,6 +1,6 @@
 .order-details-location {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
 }
 
 .order-details-location-data {
