@@ -1,0 +1,76 @@
+.order-details-data{
+
+}
+.order-details-info{
+    display: flex;
+    align-items: flex-start;
+}
+#order-details-h1{
+    color: #3c3c3c;
+    font-family: "Montserrat", sans-serif;
+    margin-left: 200px;
+}
+.current-location{
+    margin-left: 45px;
+    white-space: nowrap;
+}
+#current-location-info{
+    color: #3c3c3c;
+    font-family: "Montserrat", sans-serif;
+}
+.current-location h1{
+    font-family: "Malgun Gothic", sans-serif;
+    color: #686868;
+    margin-top: 15px;
+}
+.current-location h1:first-child {
+     margin-top: 0;
+ }
+
+.current-location-data{
+    display: flex;
+    align-items: center;
+    font-family: Calibri, "sans-serif";
+    color: #323232;
+    margin-top: 20px;
+    gap: 1rem;
+}
+.current-location-data h2{
+    margin-top: 5px;
+}
+
+.order-details-table table, th, td {
+    border-style: solid;
+    border-color: #c6c6c6;
+    border-collapse: collapse;
+    background-color: #f8f6f6;
+}
+.order-details-table{
+    margin-left: 200px;
+}
+.order-details-table table {
+    font-family: "DM Sans", sans-serif;
+    width: 80%;
+    min-width: 125px;
+    table-layout: fixed;
+}
+.order-details-table th{
+    padding: 15px;
+}
+.order-details-table td{
+    padding: 10px;
+}
+.order-details-table th:nth-child(1),
+.order-details-table td:nth-child(1) { width: 10%; }  /* Driver ID */
+
+.order-details-table th:nth-child(2),
+.order-details-table td:nth-child(2) { width: 10%; }  /* Order ID */
+
+.order-details-table th:nth-child(3),
+.order-details-table td:nth-child(3) { width: 20%; }  /* Order Status */
+
+.order-details-table th:nth-child(4),
+.order-details-table td:nth-child(4) { width: 30%; }  /* Lat */
+
+.order-details-table th:nth-child(5),
+.order-details-table td:nth-child(5) { width: 30%; }  /* Lon */

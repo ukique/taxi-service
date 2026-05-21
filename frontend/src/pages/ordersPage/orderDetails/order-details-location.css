@@ -1,0 +1,21 @@
+.order-details-location {
+    display: flex;
+    align-items: flex-start;
+}
+
+.order-details-location-data {
+    margin-left: 45px;
+    margin-top: 10px;
+    white-space: nowrap;
+}
+
+.order-details-location-data h1 {
+    color: #3c3c3c;
+    font-family: "Montserrat", sans-serif;
+}
+
+.order-details-location-data h2 {
+    margin-top: 10px;
+    color: #6b7280;
+    font-family: Montserrat, sans-serif;
+}

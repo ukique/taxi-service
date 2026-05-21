@@ -13,11 +13,12 @@ func (h *Handler) WebSocketHandler(c *gin.Context) {
 		return
 	}
 	client := &Client{
-		conn:             wsConn,
-		send:             make(chan []byte, 256),
-		hub:              h.hub,
-		orderRepository:  h.orderRepository,
-		driverRepository: h.driverRepository,
+		conn:               wsConn,
+		send:               make(chan []byte, 256),
+		hub:                h.hub,
+		orderRepository:    h.orderRepository,
+		driverRepository:   h.driverRepository,
+		locationRepository: h.locationRepository,
 	}
 	h.hub.register <- client
 

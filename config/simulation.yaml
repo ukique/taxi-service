@@ -1,0 +1,4 @@
+simulator:
+  drivers: 1000 #the num working simultaneously
+  location_updates: 50 #the number of location updates during the fulfillment of one order
+  timeout: 5s #the timeout between location updates 

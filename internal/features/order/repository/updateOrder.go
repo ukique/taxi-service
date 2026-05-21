@@ -20,13 +20,13 @@ func UpdateOrder(ctx context.Context, pool *pgxpool.Pool, orderID int) error {
 	return nil
 }
 
-func UpdateOrderStatus(ctx context.Context, pool *pgxpool.Pool, orderID int, status string) error {
+func (o *OrderRepository) UpdateOrderStatus(ctx context.Context, orderID int, status string) error {
 	sqlQuery := `
 	UPDATE orders
 	SET status=$1
 	WHERE id=$2
 `
-	_, err := pool.Exec(ctx, sqlQuery, status, orderID)
+	_, err := o.pool.Exec(ctx, sqlQuery, status, orderID)
 	if err != nil {
 		return err
 	}

@@ -4,7 +4,7 @@
 
 ```json
 {
-  "driver_id": "<random driver id from MySQL db>",
+  "driver_id": "<random driver id from PostgreSQL db>",
   "coordinates": {
     "lat": "<random float64 for example 47.842658>",
     "lon": "<random float64 for example 34.811989>"

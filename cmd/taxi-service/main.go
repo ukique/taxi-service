@@ -1,18 +1,19 @@
 package main
 
 import (
-	"context"
 	"log"
 	"os"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
-	"github.com/ukique/taxi-service/internal/core/database"
+	"github.com/ukique/taxi-service/internal/core/connections"
 	"github.com/ukique/taxi-service/internal/core/rabbitmq"
 	"github.com/ukique/taxi-service/internal/core/ws"
 	driversRepository "github.com/ukique/taxi-service/internal/features/driver/repository"
 	driverTransport "github.com/ukique/taxi-service/internal/features/driver/transport"
+	"github.com/ukique/taxi-service/internal/features/locations"
+	locationrepository "github.com/ukique/taxi-service/internal/features/locations/repository"
+	locationtransport "github.com/ukique/taxi-service/internal/features/locations/transport"
 	"github.com/ukique/taxi-service/internal/features/order/repository"
 	userTransport "github.com/ukique/taxi-service/internal/features/user/transport"
 
@@ -20,80 +21,54 @@ import (
 )
 
 func main() {
-	// Load .env
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("Error loading .env file", err)
-		os.Exit(1)
-	}
-	// get DATABASE_URL from .env
-	dataBaseURL := os.Getenv("DATABASE_URL")
+	connection := connections.LoadConnections()
+	defer connection.Pool.Close()
 
-	//get SECRET_KEY for JWT
-	secretKey := os.Getenv("SECRET_KEY")
-
-	//get RABBITMQ_URL from .env
-	rabbitmqURL := os.Getenv("RABBITMQ_URL")
-
-	// create *Conn for database features
-	ctx := context.Background()
-	pool, err := database.CreateConnection(ctx, dataBaseURL)
-	if err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
-
-	// create *amqp.Connection for RabbitMQ features
-	brokerConn, err := rabbitmq.CreateRabbitMQConnection(rabbitmqURL)
-	if err != nil {
-		log.Println("fail to connect to RabbitMQ:", err)
-		os.Exit(1)
-	}
 	defer func() {
-		if err := brokerConn.Close(); err != nil {
-			log.Println("fail to close RabbitMQ connection:", err)
-		}
-	}()
-
-	// create *amqp.Channel (broker channel)
-	brokerChannel, err := rabbitmq.CreateChannel(brokerConn)
-	if err != nil {
-		log.Println("fail to create RabbitMQ channel:", err)
-		os.Exit(1)
-	}
-	defer func() {
-		if err := brokerChannel.Close(); err != nil {
-			log.Println("fail to close RabbitMQ channel:", err)
-			os.Exit(1)
-		}
-	}()
-
-	// create Queue Declare for Orders Coordinates *amqp.Queue (broker queue)
-	orderCoordinatesQueue, err := rabbitmq.QueueDeclareOrdersCoordinates(brokerChannel)
-	if err != nil {
-		log.Println("fail to create Queue Declare Orders Coordinates:", err)
-		os.Exit(1)
-	}
-
-	go func() {
-		if err := rabbitmq.LocationDatabaseConsumer(ctx, pool, brokerChannel, orderCoordinatesQueue); err != nil {
-			log.Println("consume error:", err)
-			os.Exit(1)
+		if err := connection.Broker.Close(); err != nil {
+			log.Printf("failed to close broker: %v", err)
 		}
 	}()
 
 	//Run Hub for ws connections
 	hub := ws.NewHub()
 	go hub.Run()
-	orderRepository := repository.NewOrderRepository(pool)
-	driverRepository := driversRepository.NewDriversRepository(pool)
-	userHandler := userTransport.NewUserRegisterHandler(pool)
-	authUserHandler := userTransport.NewAuthUserHandler(pool, secretKey)
-	driverHandler := driverTransport.NewDriverHandler(pool, secretKey, hub, driverRepository)
-	orderHandler := orderTransport.NewOrderHandler(pool, secretKey, hub, orderRepository)
-	refreshTokenHandler := userTransport.NewRefreshHandler(pool, secretKey)
 
-	websocket := ws.NewWSHandler(pool, hub, orderRepository, driverRepository)
+	orderRepository := repository.NewOrderRepository(connection.Pool)
+	driverRepository := driversRepository.NewDriversRepository(connection.Pool)
+	userHandler := userTransport.NewUserRegisterHandler(connection.Pool)
+	authUserHandler := userTransport.NewAuthUserHandler(connection.Pool, connection.SecretKey)
+	driverHandler := driverTransport.NewDriverHandler(connection.Pool, connection.SecretKey, hub, driverRepository)
+	orderHandler := orderTransport.NewOrderHandler(connection.Pool, connection.SecretKey, hub, orderRepository, connection.Broker)
+	refreshTokenHandler := userTransport.NewRefreshHandler(connection.Pool, connection.SecretKey)
+	locationRepository := locationrepository.NewLocationRepository(connection.Pool)
+	locationHandler := locationtransport.NewLocationHandler(locationRepository)
+	websocket := ws.NewWSHandler(connection.Pool, hub, orderRepository, driverRepository, locationRepository)
+
+	locationConsumer := locations.NewLocationConsumer(locationRepository, hub)
+	orderCreatedConfig := rabbitmq.QueueConfig{
+		Name:       "order.created",
+		Durable:    true,
+		AutoDelete: false,
+		Exclusive:  false,
+		NoWait:     false,
+		Args:       nil,
+	}
+	_, err := connection.Broker.DeclareQueue(orderCreatedConfig)
+	if err != nil {
+		log.Println("fail to Declare Queue order.created :", err)
+		os.Exit(1)
+	}
+	orderCoordinatesConsumerConfig := rabbitmq.ConsumerConfig{
+		QueueName:   "order.coordinates",
+		ConsumerTag: "",
+		AutoAck:     false,
+		Exclusive:   false,
+		NoLocal:     false,
+		NoWait:      false,
+		Args:        nil,
+	}
+	go connection.Broker.Consumer(orderCoordinatesConsumerConfig, locationConsumer.OrderLocationConsumer)
 	//GIN setup
 	router := gin.Default()
 	router.Use(cors.New(cors.Config{
@@ -116,7 +91,9 @@ func main() {
 	//order
 	router.POST("/orders", orderHandler.CreateOrderHandler)
 	//router.GET("/orders/complete", orderHandler.CompleteOrderHandler)
-	router.GET("/orders/details/:id")
+	//router.GET("/orders/details/:id")
+	//coordinates
+	router.GET("/location/:id", locationHandler.OrderLocationHistoryHandler)
 	if err := router.Run(":8080"); err != nil {
 		log.Println("fail run server on port 8080:", err)
 		os.Exit(1)

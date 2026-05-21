@@ -7,21 +7,25 @@ import Authentication from "./pages/authenticationPage/authenticationPage.jsx";
 import ProtectedRouter from "./utils/protectedRouter.jsx";
 import {useEffect} from "react";
 import ws from "./services/websocket.js";
+import OrderDetailsLocation from "./pages/ordersPage/orderDetails/order-details-location.jsx";
+import OrderDetailsInfo from "./pages/ordersPage/orderDetails/order-details-info.jsx";
 
 function App() {
     useEffect(() => {
         ws.connect("ws://localhost:8080/ws");
     }, []);
     return (
-            <Routes>
-                <Route path="/users/register" element={<Registration/>}/>
-                <Route path="/users/authentication" element={<Authentication/>}/>
-                <Route element={<ProtectedRouter/>}>
-                    <Route path="/" element={<Navigate to="/orders"/>}/>
-                    <Route path="/orders" element={<Orders/>}/>
-                    <Route path="/drivers" element={<Drivers/>}/>
-                </Route>
-            </Routes>
+        <Routes>
+            <Route path="/users/register" element={<Registration/>}/>
+            <Route path="/users/authentication" element={<Authentication/>}/>
+            <Route element={<ProtectedRouter/>}>
+                <Route path="/" element={<Navigate to="/orders"/>}/>
+                <Route path="/orders/page/:id" element={<OrderDetailsInfo/>}/>
+                <Route path="/orders/page/:id/location" element={<OrderDetailsLocation/>}/>
+                <Route path="/orders" element={<Orders/>}/>
+                <Route path="/drivers" element={<Drivers/>}/>
+            </Route>
+        </Routes>
     )
 }
 
