@@ -1,0 +1,27 @@
+.tabs {
+    display: flex;
+    margin-bottom: 1.5rem;
+    gap: 5rem;
+}
+
+.tab {
+    padding: 10px 18px;
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: none;
+    border-bottom: 2px solid transparent;
+    color: #888;
+    transition: all 0.15s;
+}
+
+.tab:hover {
+    color: #222;
+}
+
+.tab.active {
+    color: #3c3c3c;
+    border-bottom-color: #3c3c3c;
+}

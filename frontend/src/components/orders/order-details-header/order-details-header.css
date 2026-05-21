@@ -1,4 +1,4 @@
-.orders-details {
+.orders-details-header {
     padding-top: 135px;
     padding-left: 50px;
 }
@@ -24,20 +24,20 @@
     text-decoration-color: #444141;
 }
 
-.orders-details-info {
+.orders-details-header-data {
     display: flex;
     align-items: center;
     gap: 1rem;
     margin-top: 20px;
 }
 
-.orders-details-info h1 {
+.orders-details-header-data h1 {
     color: #0a0a0a;
     font-family: "DM Sans", sans-serif;
     font-size: 3rem;
 }
 
-.orders-details-info h2 {
+.orders-details-header-data h2 {
     color: #686868;
     font-family: "DM Sans", sans-serif;
     font-size: 2.5rem;

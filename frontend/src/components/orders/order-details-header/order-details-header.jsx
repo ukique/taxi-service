@@ -1,29 +1,28 @@
 import Header from "../../header/header.jsx";
-import "./orderDetails.css"
+import "./order-details-header.css"
 import {Link, useParams} from "react-router-dom";
 import backArrow from '../../../assets/backArrow.png';
-import OrderDetailsData from "./orderDetailsData.jsx";
+import OrderDetailsTabs from "./order-details-tabs.jsx";
 
-function OrderDetails() {
+function OrderDetailsHeader({ defaultTab }) {
     const {id} = useParams();
     return (
         <>
-            <Header/>
-            <div className="orders-details">
+            <div className="orders-details-header">
                 <div className="back-to-orders">
                     <Link to="/orders">
                         <img src={backArrow} alt="back"/>
                         <h2>Back to orders</h2>
                     </Link>
                 </div>
-                <div className="orders-details-info">
+                <div className="orders-details-header-data">
                     <h1>Order Details</h1>
                     <h2>#{id}</h2>
                 </div>
-            <OrderDetailsData/>
+                <OrderDetailsTabs defaultTab={defaultTab} />
             </div>
-        </>
+         </>
     )
 }
 
-export default OrderDetails
+export default OrderDetailsHeader

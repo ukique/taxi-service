@@ -7,7 +7,8 @@ import Authentication from "./pages/authenticationPage/authenticationPage.jsx";
 import ProtectedRouter from "./utils/protectedRouter.jsx";
 import {useEffect} from "react";
 import ws from "./services/websocket.js";
-import OrderDetails from "./components/orders/order-details/orderDetails.jsx";
+import OrderDetailsLocation from "./pages/ordersPage/orderDetails/order-details-location.jsx";
+import OrderDetailsInfo from "./pages/ordersPage/orderDetails/order-details-info.jsx";
 
 function App() {
     useEffect(() => {
@@ -19,7 +20,8 @@ function App() {
             <Route path="/users/authentication" element={<Authentication/>}/>
             <Route element={<ProtectedRouter/>}>
                 <Route path="/" element={<Navigate to="/orders"/>}/>
-                <Route path="/orders/page/:id" element={<OrderDetails/>}/>
+                <Route path="/orders/page/:id" element={<OrderDetailsInfo/>}/>
+                <Route path="/orders/page/:id/location" element={<OrderDetailsLocation/>}/>
                 <Route path="/orders" element={<Orders/>}/>
                 <Route path="/drivers" element={<Drivers/>}/>
             </Route>
