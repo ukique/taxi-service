@@ -13,6 +13,7 @@ import (
 	driverTransport "github.com/ukique/taxi-service/internal/features/driver/transport"
 	"github.com/ukique/taxi-service/internal/features/locations"
 	locationrepository "github.com/ukique/taxi-service/internal/features/locations/repository"
+	locationtransport "github.com/ukique/taxi-service/internal/features/locations/transport"
 	"github.com/ukique/taxi-service/internal/features/order/repository"
 	userTransport "github.com/ukique/taxi-service/internal/features/user/transport"
 
@@ -41,7 +42,7 @@ func main() {
 	orderHandler := orderTransport.NewOrderHandler(connection.Pool, connection.SecretKey, hub, orderRepository, connection.Broker)
 	refreshTokenHandler := userTransport.NewRefreshHandler(connection.Pool, connection.SecretKey)
 	locationRepository := locationrepository.NewLocationRepository(connection.Pool)
-
+	locationHandler := locationtransport.NewLocationHandler(locationRepository)
 	websocket := ws.NewWSHandler(connection.Pool, hub, orderRepository, driverRepository, locationRepository)
 
 	locationConsumer := locations.NewLocationConsumer(locationRepository, hub)
@@ -90,7 +91,9 @@ func main() {
 	//order
 	router.POST("/orders", orderHandler.CreateOrderHandler)
 	//router.GET("/orders/complete", orderHandler.CompleteOrderHandler)
-	router.GET("/orders/details/:id")
+	//router.GET("/orders/details/:id")
+	//coordinates
+	router.GET("/location/:id", locationHandler.OrderLocationHistoryHandler)
 	if err := router.Run(":8080"); err != nil {
 		log.Println("fail run server on port 8080:", err)
 		os.Exit(1)
