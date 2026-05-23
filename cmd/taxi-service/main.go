@@ -84,6 +84,7 @@ func main() {
 	router.POST("/users/authentication", authUserHandler.AuthenticationUserHandler)
 	router.POST("/refreshToken", refreshTokenHandler.RefreshTokenHandler)
 	//drivers
+	router.GET("/drivers/:id/page/:pageID", driverHandler.GetDriversHistoryHandler)
 	router.POST("/drivers/create", driverHandler.CreateDriverHandler)
 	router.DELETE("/drivers/:id", driverHandler.DeleteDriverHandler)
 	router.PATCH("/drivers/:id/username", driverHandler.ChangeDriverNameHandler)
