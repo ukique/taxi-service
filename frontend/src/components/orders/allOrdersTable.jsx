@@ -50,7 +50,7 @@ function AllOrdersTable() {
                             filteredOrders.toReversed().map(order => (
                                 <tr key={order.id}>
                                     <td>
-                                        <Link className="order-status-id" to={`/orders/page/${order.id}`}>
+                                        <Link className="link" to={`/orders/page/${order.id}`}>
                                             {order.id}
                                         </Link>
                                     </td>

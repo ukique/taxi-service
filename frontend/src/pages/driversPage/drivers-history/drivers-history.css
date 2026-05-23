@@ -1,0 +1,23 @@
+.drivers-history-info h1{
+    font-family: "DM Sans", sans-serif;
+    color: #323232;
+    text-align: center;
+}
+.drivers-history-info{
+    padding-top: 135px;
+}
+.drivers-history{
+    margin-top: 25px;
+}
+.drivers-pagination{
+    margin-top: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+.drivers-pagination a{
+    text-decoration: none;
+    color: #494949;
+    font-family: "IBM Plex Sans", sans-serif;
+}

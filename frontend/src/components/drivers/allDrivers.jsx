@@ -2,6 +2,7 @@ import {useCallback, useState} from "react"
 import "./allDrivers.css"
 import {refreshAccessToken} from "../../api/authApi.js";
 import {useSubscription} from "../../hooks/useSubscription.js";
+import {Link} from "react-router-dom";
 
 function AllDriversTable() {
     const [drivers, setDrivers] = useState([])
@@ -26,7 +27,7 @@ function AllDriversTable() {
     }, []);
 
     useSubscription({
-        subscribeMsg:   { type: "subscribe_drivers", page: 1 },
+        subscribeMsg: {type: "subscribe_drivers", page: 1},
         onMessage: handleMessage,
     });
 
@@ -278,7 +279,9 @@ function AllDriversTable() {
                 <tbody>
                 {filteredDrivers.toReversed().map(driver => (
                     <tr key={driver.id}>
-                        <td>{driver.id}</td>
+                        <td><Link className="link" to={`/drivers/${driver.id}/page/1`}>
+                            {driver.id}
+                             </Link></td>
                         <td>{driver.username}</td>
                         <td>{driver.status}</td>
                     </tr>
