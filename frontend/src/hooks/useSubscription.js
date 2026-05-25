@@ -8,7 +8,13 @@ export function useSubscription({ subscribeMsg, unsubscribeMsg, onMessage }) {
     );
 
     useEffect(() => {
+        if (!subscribeMsg) {
+            ws.off("message", handler);
+            return;
+        }
+
         const sendSubscribe = () => ws.send(subscribeMsg);
+
         if (ws.socket?.readyState === WebSocket.OPEN) {
             sendSubscribe();
         } else {
@@ -22,5 +28,5 @@ export function useSubscription({ subscribeMsg, unsubscribeMsg, onMessage }) {
             ws.off("message", handler);
             ws.off("open", sendSubscribe);
         };
-    }, []);
+    }, [subscribeMsg, handler]);
 }

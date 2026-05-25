@@ -1,6 +1,5 @@
 .orders-table{
     margin-left: 100px;
-    block-size: 50px;
 }
 .orders-table table, th, td {
     border-style: solid;
@@ -33,3 +32,17 @@
 
 .orders-table th:nth-child(4),
 .orders-table td:nth-child(4) { width: 45%; }  /* Created_At */
+
+.orders-pagination {
+    margin-top: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+.orders-pagination a {
+    text-decoration: none;
+    color: #494949;
+    font-family: "IBM Plex Sans", sans-serif;
+}

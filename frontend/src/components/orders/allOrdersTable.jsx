@@ -1,22 +1,57 @@
 import "./allOrdersTable.css"
-import {useCallback, useState} from "react";
+import {useCallback, useEffect, useRef, useState, useMemo} from "react";
 import {useSubscription} from "../../hooks/useSubscription";
-import {Link} from "react-router-dom";
+import {Link, useParams} from "react-router-dom";
+import LowerHeader from "../header/lowerHeader.jsx";
 
 function AllOrdersTable() {
     const [orders, setOrders] = useState([]);
     const [filterText, setFilterText] = useState("");
 
+    const { id } = useParams();
+    const page = Number(id);
+
+    const pageRef = useRef(page);
+    useEffect(() => { pageRef.current = page; }, [page]);
+
+    useEffect(() => {
+        setOrders([]);
+    }, [page]);
+
     const handleMessage = useCallback((data) => {
-        if (data.type === "orders") {
+        if (data.type === "orders" && pageRef.current === 1) {
             setOrders(data.data ?? []);
         }
     }, []);
 
+    const subscribeMsg = useMemo(() =>
+            page === 1 ? { type: "subscribe_orders", page: 1 } : null
+        , [page]);
+
     useSubscription({
-        subscribeMsg: {type: "subscribe_orders", page: 1},
+        subscribeMsg,
         onMessage: handleMessage,
     });
+
+    useEffect(() => {
+        if (page === 1) return;
+
+        const fetchData = async () => {
+            try {
+                const response = await fetch(
+                    `http://localhost:8080/orders/${page}`
+                );
+
+                const json = await response.json();
+
+                setOrders(json ?? []);
+            } catch (err) {
+                console.error("Failed to fetch orders:", err);
+            }
+        };
+
+        fetchData().catch(console.error);
+    }, [page]);
 
     const handlerFilterChange = (event) => setFilterText(event.target.value);
 
@@ -63,6 +98,28 @@ function AllOrdersTable() {
                         </tbody>
                     </table>
                 </div>
+            </div>
+            <div className="orders-pagination">
+                {page > 1 && (
+                    <h3>
+                        <Link to={`/orders/${page - 1}`}>
+                            {page - 1}
+                        </Link>
+                    </h3>
+                )}
+
+                <h2>
+                    <Link to={`/orders/${page}`}>
+                        {page}
+                    </Link>
+                </h2>
+
+                <h3>
+                    <Link to={`/orders/${page + 1}`}>
+                        {page + 1}
+                    </Link>
+                </h3>
+                <LowerHeader/>
             </div>
         </>
     );

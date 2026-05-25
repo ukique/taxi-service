@@ -91,6 +91,7 @@ func main() {
 	router.PATCH("/drivers/:id/status", driverHandler.ChangeDriverStatusHandler)
 	//order
 	router.POST("/orders", orderHandler.CreateOrderHandler)
+	router.GET("/orders/:id", orderHandler.GetOrdersDataHandler)
 	//router.GET("/orders/complete", orderHandler.CompleteOrderHandler)
 	//router.GET("/orders/details/:id")
 	//coordinates
