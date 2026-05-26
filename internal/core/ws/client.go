@@ -101,11 +101,13 @@ func (c *Client) ReadPump() {
 				log.Println("failed to GetLastCoordinatesEvent", err)
 				return
 			}
+
 			eventBody := models.OutgoingMessage[models.OrderCoordinateEvent]{
 				Type: "coordinates",
 				Page: c.subscribedPage,
 				Data: lastEvent,
 			}
+
 			event, err := json.Marshal(eventBody)
 			if err != nil {
 				log.Println("failed to Marshal eventBody:", err)

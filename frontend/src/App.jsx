@@ -9,6 +9,7 @@ import {useEffect} from "react";
 import ws from "./services/websocket.js";
 import OrderDetailsLocation from "./pages/ordersPage/orderDetails/order-details-location.jsx";
 import OrderDetailsInfo from "./pages/ordersPage/orderDetails/order-details-info.jsx";
+import DriversHistory from "./pages/driversPage/drivers-history/drivers-history.jsx";
 
 function App() {
     useEffect(() => {
@@ -19,11 +20,12 @@ function App() {
             <Route path="/users/register" element={<Registration/>}/>
             <Route path="/users/authentication" element={<Authentication/>}/>
             <Route element={<ProtectedRouter/>}>
-                <Route path="/" element={<Navigate to="/orders"/>}/>
+                <Route path="/" element={<Navigate to="/orders/1"/>}/>
                 <Route path="/orders/page/:id" element={<OrderDetailsInfo/>}/>
                 <Route path="/orders/page/:id/location" element={<OrderDetailsLocation/>}/>
-                <Route path="/orders" element={<Orders/>}/>
+                <Route path="/orders/:id" element={<Orders/>}/>
                 <Route path="/drivers" element={<Drivers/>}/>
+                <Route path="/drivers/:id/page/:pageID" element={<DriversHistory/>}/>
             </Route>
         </Routes>
     )

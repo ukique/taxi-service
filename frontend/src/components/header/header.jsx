@@ -10,10 +10,10 @@ function Header() {
     return (
         <>
             <header className="header">
-                <a onClick={() => navigate("/orders")}><img className="logo" src={logo} alt="logo"/></a>
+                <a onClick={() => navigate("/orders/:id")}><img className="logo" src={logo} alt="logo"/></a>
                 <nav>
-                    <button className={`headerButton ${location.pathname === "/orders" ? "active" : ""}`}
-                            onClick={() => navigate("/orders")}>Orders
+                    <button className={`headerButton ${location.pathname === "/orders/1" ? "active" : ""}`}
+                            onClick={() => navigate("/orders/1")}>Orders
                     </button>
                     <button className={`headerButton ${location.pathname === "/drivers" ? "active" : ""}`}
                             onClick={() => navigate("/drivers")}>Drivers

@@ -1,4 +1,4 @@
-package locations
+package consumer
 
 import (
 	"context"
@@ -6,22 +6,8 @@ import (
 	"log"
 
 	amqp "github.com/rabbitmq/amqp091-go"
-	"github.com/ukique/taxi-service/internal/features/order/transport"
 	"github.com/ukique/taxi-service/internal/models"
 )
-
-type Consumer struct {
-	hub    transport.Broadcaster
-	writer LocationWriter
-}
-
-func NewLocationConsumer(writer LocationWriter, hub transport.Broadcaster) *Consumer {
-	return &Consumer{writer: writer, hub: hub}
-}
-
-type LocationWriter interface {
-	SaveLocation(ctx context.Context, orderBody models.OrderCoordinateEvent) error
-}
 
 func (c *Consumer) OrderLocationConsumer(delivery amqp.Delivery) {
 
@@ -37,7 +23,7 @@ func (c *Consumer) OrderLocationConsumer(delivery amqp.Delivery) {
 	}
 
 	//Saving to driver_locations table
-	if err := c.writer.SaveLocation(context.Background(), eventBody); err != nil {
+	if err := c.locationRepository.SaveLocation(context.Background(), eventBody); err != nil {
 		log.Println("failed to SaveLocation: ", err)
 		err := delivery.Nack(false, true)
 		if err != nil {
@@ -68,5 +54,25 @@ func (c *Consumer) OrderLocationConsumer(delivery amqp.Delivery) {
 
 	if err := delivery.Ack(false); err != nil {
 		log.Println("failed to send Ack message:", err)
+	}
+	if eventBody.Status == "done" {
+		//search driverID from DataBase
+		driverID, err := c.orderRepository.GetDriverIDByOrder(context.Background(), eventBody.Order.ID)
+		if err != nil {
+			log.Println("failed to get driverID:", err)
+			return
+		}
+
+		// unlock driver (because we use FOR UPDATE SKIP LOCKED in SearchAvailableDriver func)
+		if err := c.driverRepository.UnlockDriver(context.Background(), driverID); err != nil {
+			log.Println("failed to unlock driver:", err)
+			return
+		}
+
+		//update order status to false (closed)
+		if err := c.orderRepository.UpdateOrder(context.Background(), eventBody.Order.ID); err != nil {
+			log.Println("failed to update order:", err)
+			return
+		}
 	}
 }

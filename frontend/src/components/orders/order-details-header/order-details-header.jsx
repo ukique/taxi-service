@@ -10,7 +10,7 @@ function OrderDetailsHeader({ defaultTab }) {
         <>
             <div className="orders-details-header">
                 <div className="back-to-orders">
-                    <Link to="/orders">
+                    <Link to="/orders/1">
                         <img src={backArrow} alt="back"/>
                         <h2>Back to orders</h2>
                     </Link>

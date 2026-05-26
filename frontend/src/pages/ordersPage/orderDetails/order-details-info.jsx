@@ -13,6 +13,8 @@ function OrderDetailsInfo() {
         if (data.type === "coordinates") {
             setCoordinates(data.data);
         }
+        console.log("INCOMING:", data.data);
+        console.log("STATE:", coordinates);
     }, []);
 
     useSubscription({
@@ -50,7 +52,7 @@ function OrderDetailsInfo() {
                             <tbody>
                             {coordinates ? (
                                 <tr>
-                                    <td>{coordinates.DriverID}</td>
+                                    <td>{coordinates.driver_id}</td>
                                     <td>{coordinates.id}</td>
                                     <td>{coordinates.status || "—"}</td>
                                 </tr>

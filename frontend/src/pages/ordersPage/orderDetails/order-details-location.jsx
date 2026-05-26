@@ -57,9 +57,9 @@ function OrderDetailsLocation() {
                         ) : (
                             data.map((entry, index) => (
                                 <tr key={index}>
-                                    <td>{entry.DriverID}</td>
+                                    <td>{entry.driver_id}</td>
                                     <td>{entry.id}</td>
-                                    <td>{entry.status || "—"}</td>
+                                    <td>{entry.status}</td>
                                     <td>{entry.lat}</td>
                                     <td>{entry.lon}</td>
                                 </tr>

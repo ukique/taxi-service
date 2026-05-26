@@ -32,13 +32,13 @@ func SearchAvailableDriver(ctx context.Context, pool *pgxpool.Pool) (int, error)
 }
 
 // UnlockDriver sets driver status to available after order completion.
-func UnlockDriver(ctx context.Context, pool *pgxpool.Pool, driverID int) error {
+func (d *DriversRepository) UnlockDriver(ctx context.Context, driverID int) error {
 	sqlQuery := `
     UPDATE drivers
 	SET status = 'offline'
     WHERE id = $1
 `
-	_, err := pool.Exec(ctx, sqlQuery, driverID)
+	_, err := d.pool.Exec(ctx, sqlQuery, driverID)
 	if err != nil {
 		return fmt.Errorf("fail unlock driver: %w", err)
 	}

@@ -47,27 +47,29 @@ func (c *Consumer) OrderCreatedConsumer(delivery amqp.Delivery) {
 		return
 	}
 	driverID := order.DriverID
-	order.Status = "in_progress"
 	err := c.writer.UpdateOrderStatus(context.Background(), order.ID, "in_progress")
 	if err != nil {
 		log.Println("database: fail to change order status:", err)
 	}
 
 	var coordinates models.Coordinates
-	for i := 0; i < c.simulationData.Simulator.LocationUpdates; i++ {
+	for i := 1; i <= c.simulationData.Simulator.LocationUpdates; i++ {
 
 		coordinates.Lat, coordinates.Lon, _ = services.GenerateCoordinates()
 
 		event := models.OrderCoordinateEvent{
-			DriverID: driverID,
 			Coordinates: models.Coordinates{
 				Lat: coordinates.Lat,
 				Lon: coordinates.Lon,
 			},
 			Order: models.Order{
-				ID:     order.ID,
-				Status: order.Status,
+				DriverID: driverID,
+				ID:       order.ID,
+				Status:   order.Status,
 			},
+		}
+		if c.simulationData.Simulator.LocationUpdates == i {
+			event.Order.Status = "done"
 		}
 
 		orderBody, err := json.Marshal(event)

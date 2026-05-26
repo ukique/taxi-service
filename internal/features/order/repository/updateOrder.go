@@ -3,17 +3,15 @@ package repository
 import (
 	"context"
 	"fmt"
-
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func UpdateOrder(ctx context.Context, pool *pgxpool.Pool, orderID int) error {
+func (o *OrderRepository) UpdateOrder(ctx context.Context, orderID int) error {
 	sqlQuery := `
     UPDATE orders
 	SET status='done'
     WHERE id=$1
 `
-	_, err := pool.Exec(ctx, sqlQuery, orderID)
+	_, err := o.pool.Exec(ctx, sqlQuery, orderID)
 	if err != nil {
 		return fmt.Errorf("fail update data:%w", err)
 	}

@@ -1,3 +1,8 @@
 body {
     background-color: #FFFFFF;
 }
+.link{
+    color: #634fd6;
+    cursor: pointer;
+    text-decoration: underline;
+}
