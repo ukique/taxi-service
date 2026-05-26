@@ -58,6 +58,7 @@ func (c *Consumer) OrderCreatedConsumer(delivery amqp.Delivery) {
 		coordinates.Lat, coordinates.Lon, _ = services.GenerateCoordinates()
 
 		event := models.OrderCoordinateEvent{
+			EventID: i,
 			Coordinates: models.Coordinates{
 				Lat: coordinates.Lat,
 				Lon: coordinates.Lon,

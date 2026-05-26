@@ -28,6 +28,7 @@ type LocationRepository interface {
 type OrderRepository interface {
 	UpdateOrder(ctx context.Context, orderID int) error
 	GetDriverIDByOrder(ctx context.Context, orderID int) (int, error)
+	GetOrdersData(ctx context.Context, pageID int) ([]models.Order, error)
 }
 type DriverRepository interface {
 	UnlockDriver(ctx context.Context, driverID int) error

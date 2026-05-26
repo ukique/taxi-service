@@ -51,6 +51,21 @@ func (c *Consumer) OrderLocationConsumer(delivery amqp.Delivery) {
 		return
 	}
 	c.hub.SendToBroadcast(message)
+	if eventBody.EventID == 1 {
+		updOrdersData, err := c.orderRepository.GetOrdersData(context.Background(), 1)
+		if err != nil {
+			return
+		}
+		ordersBody := models.OutgoingMessage[[]models.Order]{
+			Type: "orders",
+			Data: updOrdersData,
+		}
+		orders, err := json.Marshal(ordersBody)
+		if err != nil {
+			return
+		}
+		c.hub.SendToBroadcast(orders)
+	}
 
 	if err := delivery.Ack(false); err != nil {
 		log.Println("failed to send Ack message:", err)
@@ -74,5 +89,19 @@ func (c *Consumer) OrderLocationConsumer(delivery amqp.Delivery) {
 			log.Println("failed to update order:", err)
 			return
 		}
+
+		ordersData, err := c.orderRepository.GetOrdersData(context.Background(), 1)
+		if err != nil {
+			return
+		}
+		ordersBody := models.OutgoingMessage[[]models.Order]{
+			Type: "orders",
+			Data: ordersData,
+		}
+		orders, err := json.Marshal(ordersBody)
+		if err != nil {
+			return
+		}
+		c.hub.SendToBroadcast(orders)
 	}
 }

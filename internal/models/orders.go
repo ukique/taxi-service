@@ -12,6 +12,7 @@ type Order struct {
 // OrderCoordinateEvent is a struct for send broker message
 // Example structure you can check in docs/examples/message_broker_structure.md
 type OrderCoordinateEvent struct {
+	EventID int
 	Coordinates
 	Order
 }
