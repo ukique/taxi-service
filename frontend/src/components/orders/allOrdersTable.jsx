@@ -1,18 +1,21 @@
 import "./allOrdersTable.css"
-import {useCallback, useEffect, useRef, useState, useMemo} from "react";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {useSubscription} from "../../hooks/useSubscription";
 import {Link, useParams} from "react-router-dom";
 import LowerHeader from "../header/lowerHeader.jsx";
+import {refreshAccessToken} from "../../api/authApi.js";
 
 function AllOrdersTable() {
     const [orders, setOrders] = useState([]);
     const [filterText, setFilterText] = useState("");
 
-    const { id } = useParams();
+    const {id} = useParams();
     const page = Number(id);
 
     const pageRef = useRef(page);
-    useEffect(() => { pageRef.current = page; }, [page]);
+    useEffect(() => {
+        pageRef.current = page;
+    }, [page]);
 
     useEffect(() => {
         setOrders([]);
@@ -25,7 +28,7 @@ function AllOrdersTable() {
     }, []);
 
     const subscribeMsg = useMemo(() =>
-            page === 1 ? { type: "subscribe_orders", page: 1 } : null
+            page === 1 ? {type: "subscribe_orders", page: 1} : null
         , [page]);
 
     useSubscription({
@@ -38,13 +41,17 @@ function AllOrdersTable() {
 
         const fetchData = async () => {
             try {
-                const response = await fetch(
-                    `http://localhost:8080/orders/${page}`
-                );
-
+                let response = await fetch(`http://localhost:8080/orders/${page}`, {
+                    credentials: "include",
+                });
+                if (response.status === 401) {
+                    await refreshAccessToken();
+                    response = await fetch(`http://localhost:8080/orders/${page}`, {
+                        credentials: "include",
+                    });
+                }
                 const json = await response.json();
-
-                setOrders(json ?? []);
+                setOrders(Array.isArray(json) ? json : []);  // защита если сервер вернул не массив
             } catch (err) {
                 console.error("Failed to fetch orders:", err);
             }

@@ -22,7 +22,7 @@ function AllDriversTable() {
 
     const handleMessage = useCallback((data) => {
         if (data.type === "drivers") {
-            setDrivers(data.data);
+            setDrivers(data.data ?? []);
         }
     }, []);
 
@@ -277,15 +277,23 @@ function AllDriversTable() {
                 </tr>
                 </thead>
                 <tbody>
-                {filteredDrivers.toReversed().map(driver => (
-                    <tr key={driver.id}>
-                        <td><Link className="link" to={`/drivers/${driver.id}/page/1`}>
-                            {driver.id}
-                             </Link></td>
-                        <td>{driver.username}</td>
-                        <td>{driver.status}</td>
+                {filteredDrivers.length === 0 ? (
+                    <tr>
+                        <td colSpan={3} style={{textAlign: "center", padding: "2rem", color: "#888"}}>
+                            {drivers.length === 0 ? "Loading drivers..." : "No drivers match your search"}
+                        </td>
                     </tr>
-                ))}
+                ) : (
+                    filteredDrivers.toReversed().map(driver => (
+                        <tr key={driver.id}>
+                            <td><Link className="link" to={`/drivers/${driver.id}/page/1`}>
+                                {driver.id}
+                            </Link></td>
+                            <td>{driver.username}</td>
+                            <td>{driver.status}</td>
+                        </tr>
+                    ))
+                )}
                 </tbody>
             </table>
         </div>
