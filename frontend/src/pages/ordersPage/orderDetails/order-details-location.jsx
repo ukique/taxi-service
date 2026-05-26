@@ -1,19 +1,28 @@
 import "./order-details-location.css"
 import "./order-details-info.css"
 import OrderDetailsHeader from "../../../components/orders/order-details-header/order-details-header.jsx";
-import { useParams } from "react-router-dom";
+import {useParams} from "react-router-dom";
 import Header from "../../../components/header/header.jsx";
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
+import {refreshAccessToken} from "../../../api/authApi.js";
 
 function OrderDetailsLocation() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
-    const { id } = useParams();
+    const {id} = useParams();
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/location/${id}`);
+                let response = await fetch(`http://localhost:8080/location/${id}`, {
+                    credentials: "include",
+                });
+                if (response.status === 401) {
+                    await refreshAccessToken();
+                    response = await fetch(`http://localhost:8080/location/${id}`, {
+                        credentials: "include",
+                    });
+                }
                 const json = await response.json();
                 setData(json ?? []);
             } catch (err) {
@@ -28,12 +37,12 @@ function OrderDetailsLocation() {
 
     return (
         <>
-            <Header />
-            <OrderDetailsHeader defaultTab="location" />
+            <Header/>
+            <OrderDetailsHeader defaultTab="location"/>
             <div className="order-details-location">
                 <div className="order-details-location-data">
                     <h1>Order Location History</h1>
-                    <h2>Track and review the full<br />
+                    <h2>Track and review the full<br/>
                         route coordinates history</h2>
                 </div>
                 <div className="order-details-table">
@@ -50,7 +59,8 @@ function OrderDetailsLocation() {
                         <tbody>
                         {loading || data.length === 0 ? (
                             <tr>
-                                <td colSpan={5} style={{ textAlign: "center", padding: "2rem", color: "#888" }}>
+                                <td colSpan={5}
+                                    style={{textAlign: "center", padding: "2rem", color: "#888"}}>
                                     {loading ? "Loading location history..." : "No location data found for this order"}
                                 </td>
                             </tr>

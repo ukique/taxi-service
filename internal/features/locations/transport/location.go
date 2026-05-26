@@ -10,9 +10,10 @@ type LocationHistoryGetter interface {
 	GetOrderLocationHistory(ctx context.Context, orderID int) ([]models.OrderCoordinateEvent, error)
 }
 type Handler struct {
-	getter LocationHistoryGetter
+	getter    LocationHistoryGetter
+	secretKey string
 }
 
-func NewLocationHandler(getter LocationHistoryGetter) *Handler {
-	return &Handler{getter: getter}
+func NewLocationHandler(getter LocationHistoryGetter, secretKey string) *Handler {
+	return &Handler{getter: getter, secretKey: secretKey}
 }

@@ -13,8 +13,6 @@ function OrderDetailsInfo() {
         if (data.type === "coordinates") {
             setCoordinates(data.data);
         }
-        console.log("INCOMING:", data.data);
-        console.log("STATE:", coordinates);
     }, []);
 
     useSubscription({

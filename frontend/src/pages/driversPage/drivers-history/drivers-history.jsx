@@ -3,20 +3,30 @@ import {Link, useParams} from "react-router-dom";
 import Header from "../../../components/header/header.jsx";
 import {useEffect, useState} from "react";
 import LowerHeader from "../../../components/header/lowerHeader.jsx";
+import {refreshAccessToken} from "../../../api/authApi.js";
 
 function DriversHistory() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const {id, pageID} = useParams();
     const page = Number(pageID);
+
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/drivers/${id}/page/${pageID}`);
+                let response = await fetch(`http://localhost:8080/drivers/${id}/page/${pageID}`, {
+                    credentials: "include",
+                });
+                if (response.status === 401) {
+                    await refreshAccessToken();
+                    response = await fetch(`http://localhost:8080/drivers/${id}/page/${pageID}`, {
+                        credentials: "include",
+                    });
+                }
                 const json = await response.json();
                 setData(json ?? []);
             } catch (err) {
-                console.error("Failed to fetch location data:", err);
+                console.error("Failed to fetch drivers history:", err);
             } finally {
                 setLoading(false);
             }

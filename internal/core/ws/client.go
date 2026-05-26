@@ -36,10 +36,12 @@ type Handler struct {
 	orderRepository    OrderRepository
 	driverRepository   DriverRepository
 	locationRepository LocationRepository
+	secretKey          string
 }
 
-func NewWSHandler(pool *pgxpool.Pool, hub *Hub, orderRepository OrderRepository, driverRepository DriverRepository, locationRepository LocationRepository) *Handler {
-	return &Handler{pool: pool, hub: hub, orderRepository: orderRepository, driverRepository: driverRepository, locationRepository: locationRepository}
+func NewWSHandler(pool *pgxpool.Pool, hub *Hub, orderRepository OrderRepository, driverRepository DriverRepository, locationRepository LocationRepository,
+	secretKey string) *Handler {
+	return &Handler{pool: pool, hub: hub, orderRepository: orderRepository, driverRepository: driverRepository, locationRepository: locationRepository, secretKey: secretKey}
 }
 
 var upgrader = websocket.Upgrader{

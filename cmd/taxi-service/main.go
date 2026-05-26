@@ -42,8 +42,8 @@ func main() {
 	orderHandler := orderTransport.NewOrderHandler(connection.Pool, connection.SecretKey, hub, orderRepository, connection.Broker)
 	refreshTokenHandler := userTransport.NewRefreshHandler(connection.Pool, connection.SecretKey)
 	locationRepository := locationrepository.NewLocationRepository(connection.Pool)
-	locationHandler := locationtransport.NewLocationHandler(locationRepository)
-	websocket := ws.NewWSHandler(connection.Pool, hub, orderRepository, driverRepository, locationRepository)
+	locationHandler := locationtransport.NewLocationHandler(locationRepository, connection.SecretKey)
+	websocket := ws.NewWSHandler(connection.Pool, hub, orderRepository, driverRepository, locationRepository, connection.SecretKey)
 
 	locationConsumer := consumer.NewLocationConsumer(locationRepository, orderRepository, driverRepository, hub)
 	orderCreatedConfig := rabbitmq.QueueConfig{
