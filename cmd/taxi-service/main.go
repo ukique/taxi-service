@@ -11,7 +11,7 @@ import (
 	"github.com/ukique/taxi-service/internal/core/ws"
 	driversRepository "github.com/ukique/taxi-service/internal/features/driver/repository"
 	driverTransport "github.com/ukique/taxi-service/internal/features/driver/transport"
-	"github.com/ukique/taxi-service/internal/features/locations"
+	"github.com/ukique/taxi-service/internal/features/locations/consumer"
 	locationrepository "github.com/ukique/taxi-service/internal/features/locations/repository"
 	locationtransport "github.com/ukique/taxi-service/internal/features/locations/transport"
 	"github.com/ukique/taxi-service/internal/features/order/repository"
@@ -45,7 +45,7 @@ func main() {
 	locationHandler := locationtransport.NewLocationHandler(locationRepository)
 	websocket := ws.NewWSHandler(connection.Pool, hub, orderRepository, driverRepository, locationRepository)
 
-	locationConsumer := locations.NewLocationConsumer(locationRepository, hub)
+	locationConsumer := consumer.NewLocationConsumer(locationRepository, orderRepository, driverRepository, hub)
 	orderCreatedConfig := rabbitmq.QueueConfig{
 		Name:       "order.created",
 		Durable:    true,
@@ -92,8 +92,6 @@ func main() {
 	//order
 	router.POST("/orders", orderHandler.CreateOrderHandler)
 	router.GET("/orders/:id", orderHandler.GetOrdersDataHandler)
-	//router.GET("/orders/complete", orderHandler.CompleteOrderHandler)
-	//router.GET("/orders/details/:id")
 	//coordinates
 	router.GET("/location/:id", locationHandler.OrderLocationHistoryHandler)
 	if err := router.Run(":8080"); err != nil {
