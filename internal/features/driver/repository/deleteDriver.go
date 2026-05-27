@@ -12,7 +12,14 @@ func (d *DriversRepository) DeleteDriverByID(ctx context.Context, id int) error 
 	defer tx.Rollback(ctx)
 
 	sqlQuery := `
-	DELETE FROM orders WHERE driver_id=$1
+	DELETE FROM driver_locations WHERE driver_id=$1;
+`
+	if _, err := tx.Exec(ctx, sqlQuery, id); err != nil {
+		return err
+	}
+
+	sqlQuery = `
+	DELETE FROM orders WHERE driver_id=$1;
 `
 	if _, err := tx.Exec(ctx, sqlQuery, id); err != nil {
 		return err
