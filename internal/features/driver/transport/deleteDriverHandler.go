@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/ukique/taxi-service/internal/features/driver/repository"
 	"github.com/ukique/taxi-service/internal/middleware"
 )
 
@@ -32,7 +31,7 @@ func (h *DriverHandler) DeleteDriverHandler(c *gin.Context) {
 		return
 	}
 
-	if err := repository.DeleteDriverByID(c.Request.Context(), h.pool, idInt); err != nil {
+	if err := h.driverRepository.DeleteDriverByID(c.Request.Context(), idInt); err != nil {
 		log.Println("fail to delete driver", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "fail to delete driver"})
 		return

@@ -2,15 +2,12 @@ package repository
 
 import (
 	"context"
-	"fmt"
-
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // SearchAvailableDriver finds and locks a random available driver.
 // Must be paired with UnlockDriver func after order completion,
 // otherwise the driver will remain locked in the DB permanently.
-func SearchAvailableDriver(ctx context.Context, pool *pgxpool.Pool) (int, error) {
+func (d *DriversRepository) SearchAvailableDriver(ctx context.Context) (int, error) {
 	sqlQuery := `
     UPDATE drivers
     SET status = 'driving'
@@ -24,9 +21,9 @@ func SearchAvailableDriver(ctx context.Context, pool *pgxpool.Pool) (int, error)
     RETURNING id
 `
 	var id int
-	err := pool.QueryRow(ctx, sqlQuery).Scan(&id)
+	err := d.pool.QueryRow(ctx, sqlQuery).Scan(&id)
 	if err != nil {
-		return 0, fmt.Errorf("fail query data: %w", err)
+		return 0, err
 	}
 	return id, nil
 }
@@ -40,7 +37,7 @@ func (d *DriversRepository) UnlockDriver(ctx context.Context, driverID int) erro
 `
 	_, err := d.pool.Exec(ctx, sqlQuery, driverID)
 	if err != nil {
-		return fmt.Errorf("fail unlock driver: %w", err)
+		return err
 	}
 	return nil
 }

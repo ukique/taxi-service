@@ -4,13 +4,11 @@ import (
 	"context"
 	"log"
 
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/ukique/taxi-service/internal/features/user/repository"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func VerifyUserCredentials(ctx context.Context, pool *pgxpool.Pool, email, userName, password string) bool {
-	userData, err := repository.GetDataByEmail(ctx, pool, email)
+func (u *UserService) VerifyUserCredentials(ctx context.Context, email, userName, password string) bool {
+	userData, err := u.userRepository.GetDataByEmail(ctx, email)
 	if err != nil {
 		log.Println("fail to get data by email:", err)
 		return false

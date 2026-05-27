@@ -6,28 +6,17 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/ukique/taxi-service/internal/features/user/repository"
 	"github.com/ukique/taxi-service/internal/middleware"
 )
 
-type RefreshHandler struct {
-	secretKey string
-	pool      *pgxpool.Pool
-}
-
-func NewRefreshHandler(pool *pgxpool.Pool, secretKey string) *RefreshHandler {
-	return &RefreshHandler{pool: pool, secretKey: secretKey}
-}
-
-func (h *RefreshHandler) RefreshTokenHandler(c *gin.Context) {
+func (h *Handler) RefreshTokenHandler(c *gin.Context) {
 	clientToken, err := c.Cookie("refreshToken")
 	if err != nil {
 		log.Println("failed to get clientRefreshToken: ", err)
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "you aren't authorized!"})
 		return
 	}
-	refreshToken, err := repository.SearchRefreshToken(c.Request.Context(), h.pool, clientToken)
+	refreshToken, err := h.userRepository.SearchRefreshToken(c.Request.Context(), clientToken)
 	if err != nil {
 		log.Println("refreshToken is invalid!:", err)
 		c.JSON(http.StatusBadRequest, gin.H{"message": "You need to Log In first!"})

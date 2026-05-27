@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/ukique/taxi-service/internal/features/driver/repository"
 	"github.com/ukique/taxi-service/internal/middleware"
 	"github.com/ukique/taxi-service/internal/models"
 )
@@ -37,7 +36,7 @@ func (h *DriverHandler) CreateDriverHandler(c *gin.Context) {
 		return
 	}
 
-	if err := repository.CreateDriver(c.Request.Context(), h.pool, driver.Username); err != nil {
+	if err := h.driverRepository.CreateDriver(c.Request.Context(), driver.Username); err != nil {
 		log.Println("fail to register driver:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "fail to register driver"})
 		return

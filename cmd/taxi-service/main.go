@@ -15,9 +15,11 @@ import (
 	locationrepository "github.com/ukique/taxi-service/internal/features/locations/repository"
 	locationtransport "github.com/ukique/taxi-service/internal/features/locations/transport"
 	"github.com/ukique/taxi-service/internal/features/order/repository"
-	userTransport "github.com/ukique/taxi-service/internal/features/user/transport"
-
+	orderService "github.com/ukique/taxi-service/internal/features/order/service"
 	orderTransport "github.com/ukique/taxi-service/internal/features/order/transport"
+	userRepository "github.com/ukique/taxi-service/internal/features/user/repository"
+	userService "github.com/ukique/taxi-service/internal/features/user/service"
+	userTransport "github.com/ukique/taxi-service/internal/features/user/transport"
 )
 
 func main() {
@@ -34,18 +36,24 @@ func main() {
 	hub := ws.NewHub()
 	go hub.Run()
 
-	orderRepository := repository.NewOrderRepository(connection.Pool)
+	//drivers
 	driverRepository := driversRepository.NewDriversRepository(connection.Pool)
-	userHandler := userTransport.NewUserRegisterHandler(connection.Pool)
-	authUserHandler := userTransport.NewAuthUserHandler(connection.Pool, connection.SecretKey)
-	driverHandler := driverTransport.NewDriverHandler(connection.Pool, connection.SecretKey, hub, driverRepository)
-	orderHandler := orderTransport.NewOrderHandler(connection.Pool, connection.SecretKey, hub, orderRepository, connection.Broker)
-	refreshTokenHandler := userTransport.NewRefreshHandler(connection.Pool, connection.SecretKey)
+	driverHandler := driverTransport.NewDriverHandler(connection.SecretKey, hub, driverRepository)
+	//orders
+	orderRepository := repository.NewOrderRepository(connection.Pool)
+	orderServices := orderService.NewOrderServices(connection.Pool, driverRepository)
+	orderHandler := orderTransport.NewOrderHandler(connection.Pool, connection.SecretKey, hub, orderRepository, orderServices, connection.Broker)
+	//users
+	usersRepository := userRepository.NewUserRepository(connection.Pool)
+	usersService := userService.NewUserService(connection.Pool, usersRepository)
+	usersHandler := userTransport.NewUserHandler(connection.Pool, connection.SecretKey, usersRepository, usersService)
+	//locations
 	locationRepository := locationrepository.NewLocationRepository(connection.Pool)
 	locationHandler := locationtransport.NewLocationHandler(locationRepository, connection.SecretKey)
+	locationConsumer := consumer.NewLocationConsumer(locationRepository, orderRepository, driverRepository, hub)
+	//ws
 	websocket := ws.NewWSHandler(connection.Pool, hub, orderRepository, driverRepository, locationRepository, connection.SecretKey)
 
-	locationConsumer := consumer.NewLocationConsumer(locationRepository, orderRepository, driverRepository, hub)
 	orderCreatedConfig := rabbitmq.QueueConfig{
 		Name:       "order.created",
 		Durable:    true,
@@ -80,9 +88,9 @@ func main() {
 	//websocket
 	router.GET("/ws", websocket.WebSocketHandler)
 	//users
-	router.POST("/users/register", userHandler.RegisterUserHandler)
-	router.POST("/users/authentication", authUserHandler.AuthenticationUserHandler)
-	router.POST("/refreshToken", refreshTokenHandler.RefreshTokenHandler)
+	router.POST("/users/register", usersHandler.RegisterUserHandler)
+	router.POST("/users/authentication", usersHandler.AuthenticationUserHandler)
+	router.POST("/refreshToken", usersHandler.RefreshTokenHandler)
 	//drivers
 	router.GET("/drivers/:id/page/:pageID", driverHandler.GetDriversHistoryHandler)
 	router.POST("/drivers/create", driverHandler.CreateDriverHandler)

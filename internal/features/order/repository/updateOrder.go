@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 )
 
 func (o *OrderRepository) UpdateOrder(ctx context.Context, orderID int) error {
@@ -13,7 +12,7 @@ func (o *OrderRepository) UpdateOrder(ctx context.Context, orderID int) error {
 `
 	_, err := o.pool.Exec(ctx, sqlQuery, orderID)
 	if err != nil {
-		return fmt.Errorf("fail update data:%w", err)
+		return err
 	}
 	return nil
 }

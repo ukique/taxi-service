@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/ukique/taxi-service/internal/features/driver/repository"
 	"github.com/ukique/taxi-service/internal/middleware"
 	"github.com/ukique/taxi-service/internal/models"
 )
@@ -39,7 +38,7 @@ func (h *DriverHandler) ChangeDriverNameHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid data"})
 		return
 	}
-	err = repository.ChangeDriverName(c.Request.Context(), h.pool, idInt, driver.Username)
+	err = h.driverRepository.ChangeDriverName(c.Request.Context(), idInt, driver.Username)
 	if err != nil {
 		log.Println("fail to change driver name:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "fail to change driver name"})
@@ -80,7 +79,7 @@ func (h *DriverHandler) ChangeDriverStatusHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid status"})
 		return
 	}
-	if err := repository.ChangeDriverStatus(c.Request.Context(), h.pool, idInt, driver.Status); err != nil {
+	if err := h.driverRepository.ChangeDriverStatus(c.Request.Context(), idInt, driver.Status); err != nil {
 		log.Println("fail to change driver status:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "fail to change driver status"})
 		return

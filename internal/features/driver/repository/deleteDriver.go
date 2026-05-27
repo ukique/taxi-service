@@ -2,12 +2,10 @@ package repository
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func DeleteDriverByID(ctx context.Context, pool *pgxpool.Pool, id int) error {
-	tx, err := pool.Begin(ctx)
+func (d *DriversRepository) DeleteDriverByID(ctx context.Context, id int) error {
+	tx, err := d.pool.Begin(ctx)
 	if err != nil {
 		return err
 	}

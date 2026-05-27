@@ -6,23 +6,11 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/ukique/taxi-service/internal/features/user/repository"
-	"github.com/ukique/taxi-service/internal/features/user/service"
 	"github.com/ukique/taxi-service/internal/middleware"
 	"github.com/ukique/taxi-service/internal/models"
 )
 
-type AuthHandler struct {
-	pool      *pgxpool.Pool
-	secretKey string
-}
-
-func NewAuthUserHandler(pool *pgxpool.Pool, secretKey string) *AuthHandler {
-	return &AuthHandler{pool: pool, secretKey: secretKey}
-}
-
-func (h *AuthHandler) AuthenticationUserHandler(c *gin.Context) {
+func (h *Handler) AuthenticationUserHandler(c *gin.Context) {
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		log.Println("fail to read JSON:", err)
@@ -30,7 +18,7 @@ func (h *AuthHandler) AuthenticationUserHandler(c *gin.Context) {
 		return
 	}
 	//Validate UserData
-	isValid := service.VerifyUserCredentials(c.Request.Context(), h.pool, user.Email, user.Username, user.Password)
+	isValid := h.userService.VerifyUserCredentials(c.Request.Context(), user.Email, user.Username, user.Password)
 	if isValid {
 		refreshToken, err := middleware.GenerateRefreshToken(16)
 		if err != nil {
@@ -46,7 +34,7 @@ func (h *AuthHandler) AuthenticationUserHandler(c *gin.Context) {
 			CreatedAt:    createdAt,
 			ExpiresAt:    expireAt,
 		}
-		err = repository.SaveRefreshToken(c.Request.Context(), h.pool, dataBaseRefreshToken)
+		err = h.userRepository.SaveRefreshToken(c.Request.Context(), dataBaseRefreshToken)
 		if err != nil {
 			return
 		}

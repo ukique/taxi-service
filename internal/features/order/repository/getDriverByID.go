@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 )
 
 func (o *OrderRepository) GetDriverIDByOrder(ctx context.Context, orderID int) (int, error) {
@@ -12,7 +11,7 @@ func (o *OrderRepository) GetDriverIDByOrder(ctx context.Context, orderID int) (
 	var driverID int
 	err := o.pool.QueryRow(ctx, sqlQuery, orderID).Scan(&driverID)
 	if err != nil {
-		return 0, fmt.Errorf("fail to select driverID:%w", err)
+		return 0, err
 	}
 	return driverID, nil
 }

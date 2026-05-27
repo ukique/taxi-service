@@ -7,20 +7,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/ukique/taxi-service/internal/core"
-	"github.com/ukique/taxi-service/internal/features/user/repository"
 	"github.com/ukique/taxi-service/internal/models"
 )
 
-type RegisterHandler struct {
-	pool *pgxpool.Pool
-}
-
-func NewUserRegisterHandler(pool *pgxpool.Pool) *RegisterHandler {
-	return &RegisterHandler{pool: pool}
-}
-func (h *RegisterHandler) RegisterUserHandler(c *gin.Context) {
+func (h *Handler) RegisterUserHandler(c *gin.Context) {
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		log.Println("fail to read JSON body:", err)
@@ -71,7 +62,7 @@ func (h *RegisterHandler) RegisterUserHandler(c *gin.Context) {
 	}
 	//duplicated data
 	var pgErr *pgconn.PgError
-	err := repository.RegisterUser(c.Request.Context(), h.pool, user.Username, user.Password, user.Email)
+	err := h.userRepository.RegisterUser(c.Request.Context(), user.Username, user.Password, user.Email)
 	if err != nil {
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" { //23505 is duplicated data pgx error
 			switch pgErr.ConstraintName {

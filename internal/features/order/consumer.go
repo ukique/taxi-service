@@ -9,7 +9,7 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/ukique/taxi-service/config"
 	"github.com/ukique/taxi-service/internal/core/rabbitmq"
-	"github.com/ukique/taxi-service/internal/features/order/services"
+	locationServices "github.com/ukique/taxi-service/internal/features/locations/service"
 	"github.com/ukique/taxi-service/internal/models"
 )
 
@@ -55,7 +55,7 @@ func (c *Consumer) OrderCreatedConsumer(delivery amqp.Delivery) {
 	var coordinates models.Coordinates
 	for i := 1; i <= c.simulationData.Simulator.LocationUpdates; i++ {
 
-		coordinates.Lat, coordinates.Lon, _ = services.GenerateCoordinates()
+		coordinates.Lat, coordinates.Lon, _ = locationServices.GenerateCoordinates()
 
 		event := models.OrderCoordinateEvent{
 			EventID: i,
