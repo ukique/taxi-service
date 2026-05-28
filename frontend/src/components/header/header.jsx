@@ -10,7 +10,7 @@ function Header() {
     return (
         <>
             <header className="header">
-                <a onClick={() => navigate("/orders/:id")}><img className="logo" src={logo} alt="logo"/></a>
+                <a onClick={() => navigate("/orders/1")}><img className="logo" src={logo} alt="logo"/></a>
                 <nav>
                     <button className={`headerButton ${location.pathname === "/orders/1" ? "active" : ""}`}
                             onClick={() => navigate("/orders/1")}>Orders

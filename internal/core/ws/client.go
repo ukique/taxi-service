@@ -61,7 +61,13 @@ func (c *Client) ReadPump() {
 		var message models.IncomingMessage
 		err := c.conn.ReadJSON(&message)
 		if err != nil {
-			log.Println("failed to readMessage", err)
+			if websocket.IsUnexpectedCloseError(err,
+				websocket.CloseGoingAway,
+				websocket.CloseNormalClosure,
+				websocket.CloseNoStatusReceived,
+			) {
+				log.Println("unexpected ws disconnect:", err)
+			}
 			break
 		}
 		switch message.Type {
@@ -84,6 +90,7 @@ func (c *Client) ReadPump() {
 			c.subscribeType = "drivers"
 			driverData, err := c.driverRepository.GetDriversData(context.Background(), message.Page)
 			if err != nil {
+				log.Println()
 				return
 			}
 			driversBody := models.OutgoingMessage[[]models.Driver]{
@@ -129,7 +136,6 @@ func (c *Client) WritePump() {
 		case message, ok := <-c.send:
 			if !ok {
 				if err := c.conn.WriteMessage(websocket.CloseMessage, []byte{}); err != nil {
-					log.Println("failed to close send connection", err)
 					return
 				}
 			}
