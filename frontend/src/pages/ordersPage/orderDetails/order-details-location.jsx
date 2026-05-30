@@ -5,6 +5,7 @@ import {useParams} from "react-router-dom";
 import Header from "../../../components/header/header.jsx";
 import {useEffect, useState} from "react";
 import {refreshAccessToken} from "../../../api/authApi.js";
+import {API} from "../../../api/api.js";
 
 function OrderDetailsLocation() {
     const [data, setData] = useState([]);
@@ -14,12 +15,12 @@ function OrderDetailsLocation() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                let response = await fetch(`http://localhost:8080/location/${id}`, {
+                let response = await fetch(`${API}/location/${id}`, {
                     credentials: "include",
                 });
                 if (response.status === 401) {
                     await refreshAccessToken();
-                    response = await fetch(`http://localhost:8080/location/${id}`, {
+                    response = await fetch(`${API}/location/${id}`, {
                         credentials: "include",
                     });
                 }

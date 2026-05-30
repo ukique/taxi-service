@@ -67,6 +67,20 @@ func main() {
 		log.Println("fail to Declare Queue order.created :", err)
 		os.Exit(1)
 	}
+	orderCoordinatesConfig := rabbitmq.QueueConfig{
+		Name:       "order.coordinates",
+		Durable:    true,
+		AutoDelete: false,
+		Exclusive:  false,
+		NoWait:     false,
+		Args:       nil,
+	}
+	_, err = connection.Broker.DeclareQueue(orderCoordinatesConfig)
+	if err != nil {
+		log.Println("fail to Declare Queue order.coordinates :", err)
+		os.Exit(1)
+	}
+	
 	orderCoordinatesConsumerConfig := rabbitmq.ConsumerConfig{
 		QueueName:   "order.coordinates",
 		ConsumerTag: "",
@@ -80,7 +94,7 @@ func main() {
 	//GIN setup
 	router := gin.Default()
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowOrigins:     []string{"http://localhost"},
 		AllowMethods:     []string{"GET", "POST", "PATCH", "PUT", "DELETE"},
 		AllowHeaders:     []string{"Content-Type"},
 		AllowCredentials: true,
@@ -102,7 +116,7 @@ func main() {
 	router.GET("/orders/:id", orderHandler.GetOrdersDataHandler)
 	//coordinates
 	router.GET("/location/:id", locationHandler.OrderLocationHistoryHandler)
-	if err := router.Run(":8080"); err != nil {
+	if err := router.Run(":" + connection.AppPort); err != nil {
 		log.Println("fail run server on port 8080:", err)
 		os.Exit(1)
 	}

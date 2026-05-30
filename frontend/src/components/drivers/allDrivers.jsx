@@ -3,6 +3,7 @@ import "./allDrivers.css"
 import {refreshAccessToken} from "../../api/authApi.js";
 import {useSubscription} from "../../hooks/useSubscription.js";
 import {Link} from "react-router-dom";
+import {API} from "../../api/api.js";
 
 function AllDriversTable() {
     const [drivers, setDrivers] = useState([])
@@ -51,7 +52,7 @@ function AllDriversTable() {
         try {
             setIsLoading(true)
             setError(null)
-            let response = await fetch(`http://localhost:8080/drivers/${statusForm.id}/status`, {
+            let response = await fetch(`${API}/drivers/${statusForm.id}/status`, {
                 method: "PATCH",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({status: statusForm.status}),
@@ -88,7 +89,7 @@ function AllDriversTable() {
         try {
             setIsLoading(true)
             setError(null)
-            let response = await fetch(`http://localhost:8080/drivers/${nameForm.id}/username`, {
+            let response = await fetch(`${API}/drivers/${nameForm.id}/username`, {
                 method: "PATCH",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({username: nameForm.username}),
@@ -96,7 +97,7 @@ function AllDriversTable() {
             })
             if (response.status === 401) {
                 await refreshAccessToken()
-                response = await fetch(`http://localhost:8080/drivers/${nameForm.id}/username`, {
+                response = await fetch(`${API}/drivers/${nameForm.id}/username`, {
                     method: "PATCH",
                     headers: {"Content-Type": "application/json"},
                     body: JSON.stringify({username: nameForm.username}),
@@ -125,7 +126,7 @@ function AllDriversTable() {
         try {
             setIsLoading(true)
             setError(null)
-            let response = await fetch(`http://localhost:8080/drivers/${deleteForm.id}`, {
+            let response = await fetch(`${API}/drivers/${deleteForm.id}`, {
                 method: "DELETE",
                 credentials: "include",
             })
@@ -133,7 +134,7 @@ function AllDriversTable() {
             console.log("ok:", response.ok)
             if (response.status === 401) {
                 await refreshAccessToken()
-                response = await fetch(`http://localhost:8080/drivers/${deleteForm.id}`, {
+                response = await fetch(`${API}/drivers/${deleteForm.id}`, {
                     method: "DELETE",
                     credentials: "include",
                 })

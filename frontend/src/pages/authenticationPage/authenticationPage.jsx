@@ -4,6 +4,7 @@ import "../../pages/registerPage/registerPage.css";
 import {jwtDecode} from "jwt-decode";
 import {useNavigate} from "react-router-dom";
 import {useState} from "react";
+import {API} from "../../api/api.js";
 
 function Authentication() {
     const navigate = useNavigate();
@@ -14,12 +15,11 @@ function Authentication() {
     };
     // against multiple button clicks
     const [isLoading, setIsLoading] = useState(false)
-
     const handleSubmit = async () => {
         try {
             setIsLoading(true)
             setError(null)
-            const response = await fetch("http://localhost:8080/users/authentication", {
+            const response = await fetch(`${API}/users/authentication`, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 credentials: "include",

@@ -10,10 +10,11 @@ import ws from "./services/websocket.js";
 import OrderDetailsLocation from "./pages/ordersPage/orderDetails/order-details-location.jsx";
 import OrderDetailsInfo from "./pages/ordersPage/orderDetails/order-details-info.jsx";
 import DriversHistory from "./pages/driversPage/drivers-history/drivers-history.jsx";
+import {WS} from "./api/api.js";
 
 function App() {
     useEffect(() => {
-        ws.connect("ws://localhost:8080/ws");
+        ws.connect(`${WS}/ws`);
     }, []);
     return (
         <Routes>

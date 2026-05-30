@@ -2,6 +2,7 @@ import './registerPage.css'
 import logoWhite from "../../assets/logoWhite.png"
 import {useNavigate} from "react-router-dom";
 import {useState} from "react"
+import { API } from "../../api/api.js"
 
 function Registration() {
     const navigate = useNavigate();
@@ -18,7 +19,7 @@ function Registration() {
         try {
             setIsLoading(true)
             setError(null)
-            const response = await fetch("http://localhost:8080/users/register", {
+            const response = await fetch(`${API}/users/register`, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify(form)

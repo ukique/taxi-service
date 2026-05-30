@@ -4,6 +4,7 @@ import {useSubscription} from "../../hooks/useSubscription";
 import {Link, useParams} from "react-router-dom";
 import LowerHeader from "../header/lowerHeader.jsx";
 import {refreshAccessToken} from "../../api/authApi.js";
+import {API} from "../../api/api.js";
 
 function AllOrdersTable() {
     const [orders, setOrders] = useState([]);
@@ -41,12 +42,12 @@ function AllOrdersTable() {
 
         const fetchData = async () => {
             try {
-                let response = await fetch(`http://localhost:8080/orders/${page}`, {
+                let response = await fetch(`${API}/orders/${page}`, {
                     credentials: "include",
                 });
                 if (response.status === 401) {
                     await refreshAccessToken();
-                    response = await fetch(`http://localhost:8080/orders/${page}`, {
+                    response = await fetch(`${API}/orders/${page}`, {
                         credentials: "include",
                     });
                 }

@@ -1,8 +1,9 @@
 import axios from 'axios';
+import { API } from './api';
 
 export const refreshAccessToken = async () => {
     const response = await axios.post(
-        "http://localhost:8080/refreshToken",
+        `${API}/refreshToken`,
         {},
         {withCredentials: true}
     )

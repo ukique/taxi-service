@@ -14,6 +14,7 @@ import (
 type Connections struct {
 	Pool      *pgxpool.Pool
 	Broker    *rabbitmq.Broker
+	AppPort   string
 	SecretKey string
 }
 
@@ -21,8 +22,7 @@ func LoadConnections() *Connections {
 	// Load .env
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("Error loading .env file", err)
-		os.Exit(1)
+		log.Println("No .env file, using environment variables")
 	}
 	// get DATABASE_URL from .env
 	dataBaseURL := os.Getenv("DATABASE_URL")
@@ -32,6 +32,9 @@ func LoadConnections() *Connections {
 
 	//get RABBITMQ_URL from .env
 	rabbitmqURL := os.Getenv("RABBITMQ_URL")
+
+	//get APP_PORT from .env
+	appPort := os.Getenv("APP_PORT")
 
 	// create *Conn for database features
 	ctx := context.Background()
@@ -46,5 +49,5 @@ func LoadConnections() *Connections {
 		log.Println("failed to create NewBroker:", err)
 	}
 
-	return &Connections{Pool: pool, Broker: broker, SecretKey: secretKey}
+	return &Connections{Pool: pool, Broker: broker, SecretKey: secretKey, AppPort: appPort}
 }

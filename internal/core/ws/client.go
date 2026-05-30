@@ -75,6 +75,7 @@ func (c *Client) ReadPump() {
 			c.subscribeType = "orders"
 			ordersData, err := c.orderRepository.GetOrdersData(context.Background(), message.Page)
 			if err != nil {
+				log.Println("failed to get OrdersData:", err)
 				return
 			}
 			ordersBody := models.OutgoingMessage[[]models.Order]{
@@ -83,6 +84,7 @@ func (c *Client) ReadPump() {
 			}
 			orders, err := json.Marshal(ordersBody)
 			if err != nil {
+				log.Println("failed to Marshal orderBody:", err)
 				return
 			}
 			c.send <- orders
@@ -90,7 +92,7 @@ func (c *Client) ReadPump() {
 			c.subscribeType = "drivers"
 			driverData, err := c.driverRepository.GetDriversData(context.Background(), message.Page)
 			if err != nil {
-				log.Println()
+				log.Println("failed to GetDriversData:", err)
 				return
 			}
 			driversBody := models.OutgoingMessage[[]models.Driver]{
@@ -99,6 +101,7 @@ func (c *Client) ReadPump() {
 			}
 			drivers, err := json.Marshal(driversBody)
 			if err != nil {
+				log.Println("failed to Marshal driversBody:", err)
 				return
 			}
 			c.send <- drivers

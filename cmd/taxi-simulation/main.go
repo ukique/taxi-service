@@ -48,6 +48,19 @@ func main() {
 		log.Println("fail to Declare Queue order.coordinates :", err)
 		os.Exit(1)
 	}
+	orderCreatedQueueConfig := rabbitmq.QueueConfig{
+		Name:       "order.created",
+		Durable:    true,
+		AutoDelete: false,
+		Exclusive:  false,
+		NoWait:     false,
+		Args:       nil,
+	}
+	_, err = connection.Broker.DeclareQueue(orderCreatedQueueConfig)
+	if err != nil {
+		log.Println("fail to Declare Queue order.created :", err)
+		os.Exit(1)
+	}
 	orderCreatedConsumerConfig := rabbitmq.ConsumerConfig{
 		QueueName:   "order.created",
 		ConsumerTag: "",
