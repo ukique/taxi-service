@@ -10,7 +10,7 @@
     "lon": "<random float64 for example 34.811989>"
   },
   "order": {
-    "id": "<random order id from MySQL db>",
+    "id": "<random order id from db>",
     "status": "<created, in_progress, done>"
   }
 }
