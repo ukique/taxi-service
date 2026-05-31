@@ -2,6 +2,8 @@ package rabbitmq
 
 import (
 	"fmt"
+	"log"
+	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -13,16 +15,24 @@ type Broker struct {
 }
 
 func NewBroker(url string) (*Broker, error) {
-	//create a RabbitMQ Connection
-	conn, err := amqp.Dial(url)
+	var conn *amqp.Connection
+	var err error
+
+	for i := 0; i < 10; i++ {
+		conn, err = amqp.Dial(url)
+		if err == nil {
+			break
+		}
+		log.Printf("failed to connect RabbitMQ, retry %d/10: %v", i+1, err)
+		time.Sleep(time.Second * 3)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect RabbitMQ: %w", err)
 	}
 
-	//create a channel for working with RabbitMQ
 	ch, err := conn.Channel()
 	if err != nil {
-		return nil, fmt.Errorf("	failed to create RabbitMQ channel: %w", err)
+		return nil, fmt.Errorf("failed to create RabbitMQ channel: %w", err)
 	}
 	return &Broker{
 		conn: conn,
