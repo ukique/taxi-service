@@ -3,12 +3,14 @@ package transport
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rabbitmq/amqp091-go"
 	"github.com/ukique/taxi-service/internal/core/rabbitmq"
+	"github.com/ukique/taxi-service/internal/features/driver/repository"
 	"github.com/ukique/taxi-service/internal/middleware"
 	"github.com/ukique/taxi-service/internal/models"
 )
@@ -28,6 +30,10 @@ func (h *Handler) CreateOrderHandler(c *gin.Context) {
 	}
 	orderData, err := h.orderServices.CreateOrder(c.Request.Context())
 	if err != nil {
+		if errors.Is(err, repository.ErrNoDriverAvailable) {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"message": "no available drivers with searching status."})
+			return
+		}
 		log.Println("failed to create Order:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "fail to create Order"})
 		return

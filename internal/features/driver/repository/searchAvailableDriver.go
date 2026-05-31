@@ -2,6 +2,9 @@ package repository
 
 import (
 	"context"
+	"errors"
+
+	"github.com/jackc/pgx/v5"
 )
 
 // SearchAvailableDriver finds and locks a random available driver.
@@ -23,6 +26,9 @@ func (d *DriversRepository) SearchAvailableDriver(ctx context.Context) (int, err
 	var id int
 	err := d.pool.QueryRow(ctx, sqlQuery).Scan(&id)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return 0, ErrNoDriverAvailable
+		}
 		return 0, err
 	}
 	return id, nil
