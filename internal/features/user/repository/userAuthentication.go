@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -14,10 +15,10 @@ func (u *UserRepository) RegisterUser(ctx context.Context, username, password, e
 	}
 
 	sqlQuery := `
-	INSERT INTO users(username, password, email)
-	VALUES ($1, $2, $3);
+	INSERT INTO users(username, password, email, created_at)
+	VALUES ($1, $2, $3, $4);
 `
-	if _, err := u.pool.Exec(ctx, sqlQuery, username, string(hashedPassword), email); err != nil {
+	if _, err := u.pool.Exec(ctx, sqlQuery, username, string(hashedPassword), email, time.Now()); err != nil {
 		return err
 	}
 	return nil
