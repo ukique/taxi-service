@@ -45,7 +45,7 @@ func main() {
 	orderHandler := orderTransport.NewOrderHandler(connection.Pool, connection.SecretKey, hub, orderRepository, orderServices, connection.Broker)
 	//users
 	usersRepository := userRepository.NewUserRepository(connection.Pool)
-	usersService := userService.NewUserService(connection.Pool, usersRepository)
+	usersService := userService.NewUserService(usersRepository, connection.SecretKey)
 	usersHandler := userTransport.NewUserHandler(connection.Pool, connection.SecretKey, usersRepository, usersService)
 	//locations
 	locationRepository := locationrepository.NewLocationRepository(connection.Pool)
@@ -80,7 +80,7 @@ func main() {
 		log.Println("fail to Declare Queue order.coordinates :", err)
 		os.Exit(1)
 	}
-	
+
 	orderCoordinatesConsumerConfig := rabbitmq.ConsumerConfig{
 		QueueName:   "order.coordinates",
 		ConsumerTag: "",

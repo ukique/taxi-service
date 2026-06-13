@@ -14,6 +14,7 @@ type UserRepository interface {
 }
 type UserService interface {
 	VerifyUserCredentials(ctx context.Context, email, userName, password string) bool
+	RefreshTokenService(ctx context.Context, clientToken string) (string, error)
 }
 type Handler struct {
 	pool           *pgxpool.Pool

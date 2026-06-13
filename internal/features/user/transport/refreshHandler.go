@@ -1,12 +1,12 @@
 package transport
 
 import (
+	"errors"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/ukique/taxi-service/internal/middleware"
+	"github.com/ukique/taxi-service/config"
 )
 
 func (h *Handler) RefreshTokenHandler(c *gin.Context) {
@@ -16,21 +16,14 @@ func (h *Handler) RefreshTokenHandler(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "you aren't authorized!"})
 		return
 	}
-	refreshToken, err := h.userRepository.SearchRefreshToken(c.Request.Context(), clientToken)
+	accessToken, err := h.userService.RefreshTokenService(c.Request.Context(), clientToken)
 	if err != nil {
-		log.Println("refreshToken is invalid!:", err)
-		c.JSON(http.StatusBadRequest, gin.H{"message": "You need to Log In first!"})
-		return
-	}
-	if time.Now().After(refreshToken.ExpiresAt) {
-		log.Println("refresh token had been expire:", err)
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Session finished yet. Log In again."})
-		return
-	}
-	accessToken, err := middleware.GenerateJWT(h.secretKey, refreshToken.UserName)
-	if err != nil {
-		log.Println("fail to create JWT accessToken:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "server error"})
+		if errors.Is(err, config.ErrInvalidRefreshToken) {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "you aren't authorized!"})
+			return
+		}
+		log.Println("refreshToken service error:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "server error!"})
 		return
 	}
 	c.SetCookie("accessToken", //name
