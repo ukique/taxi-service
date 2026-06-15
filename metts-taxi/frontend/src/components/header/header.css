@@ -1,0 +1,37 @@
+.header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    background-color: rgb(25, 31, 28);
+    width: 100%;
+    height: 70px;
+    top: 0;
+    left: 0;
+    padding: 0 1rem;
+    box-sizing: border-box;
+    z-index: 100;
+}
+.header-reg-btn{
+    background-color: rgb(236, 238, 237);
+    padding: 0.75rem 1.5rem;
+    border-radius: 1rem;
+    border: none;
+    font-family: "Inter", sans-serif;
+    font-weight: 450;
+    font-size: 1rem;
+    color: #0a0a0a;
+    user-select: none;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+}
+.header-reg-btn:hover{
+    transform: scale(1.05);
+}
+.header-logo{
+    font-family: "Inter", sans-serif;
+    color: rgb(236, 238, 237);
+    padding: 0 1rem;
+    user-select: none;
+    cursor: pointer;
+}

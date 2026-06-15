@@ -1,0 +1,6 @@
+* {
+    box-sizing: border-box;
+}
+::selection{
+    background-color: #C0C0C0;
+}
