@@ -1,11 +1,11 @@
-import {Link} from "react-router-dom"
-import "./register.css"
+import {Link} from "react-router-dom";
+import "../register/register.css"
 
-function Register() {
+function LogIn() {
     return (
         <div className="auth">
             <div className="card">
-                <h1 className="auth-tittle">Register</h1>
+                <h1 className="auth-tittle">Login</h1>
                 <div className="auth-inputs">
                     <label className="label">USERNAME</label>
                     <input className="input" name="username" placeholder="Username"/>
@@ -15,16 +15,16 @@ function Register() {
                     <input className="input" name="password" type="password" placeholder="Password"/>
                 </div>
                 <div className="auth-btns">
-                <button className="create-btn">Create</button>
-                <button className="google-btn">
-                    <img src="https://www.google.com/favicon.ico" alt="google-logo"/>
-                    Google
-                </button>
+                    <button className="create-btn">Log In</button>
+                    <button className="google-btn">
+                        <img src="https://www.google.com/favicon.ico" alt="google-logo"/>
+                        Google
+                    </button>
                 </div>
-                <p className="auth-footer">Already have an account? <Link to="/login">Log In.</Link></p>
+                <p className="auth-footer">Don't have an account? <Link to="/register">Register.</Link></p>
             </div>
         </div>
     )
 }
 
-export default Register
+export default LogIn
