@@ -10,7 +10,7 @@ import (
 )
 
 type UserRepository interface {
-	GetDataByEmail(ctx context.Context, email string) (models.User, error)
+	GetDataByUsername(ctx context.Context, username string) (models.User, error)
 	SearchRefreshToken(ctx context.Context, clientToken string) (models.RefreshToken, error)
 }
 

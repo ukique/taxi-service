@@ -13,7 +13,7 @@ type UserRepository interface {
 	RegisterUser(ctx context.Context, username, password, email string) error
 }
 type UserService interface {
-	VerifyUserCredentials(ctx context.Context, email, userName, password string) bool
+	VerifyUserCredentials(ctx context.Context, user models.User) bool
 	RefreshTokenService(ctx context.Context, clientToken string) (string, error)
 }
 type Handler struct {

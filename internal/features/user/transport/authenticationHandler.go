@@ -18,7 +18,7 @@ func (h *Handler) AuthenticationUserHandler(c *gin.Context) {
 		return
 	}
 	//Validate UserData
-	isValid := h.userService.VerifyUserCredentials(c.Request.Context(), user.Email, user.Username, user.Password)
+	isValid := h.userService.VerifyUserCredentials(c.Request.Context(), user)
 	if isValid {
 		refreshToken, err := middleware.GenerateRefreshToken(16)
 		if err != nil {
@@ -50,7 +50,7 @@ func (h *Handler) AuthenticationUserHandler(c *gin.Context) {
 			60*60*24*7,     // maxAge (here 7 days)
 			"/",            // path
 			"",             // domain
-			false,          // secure WARNING: when add NGINX(https) need to do it 'true'
+			true,           // secure WARNING: when add NGINX(https) need to do it 'true'
 			true,           // httpOnly
 		)
 		c.SetCookie(
@@ -59,7 +59,7 @@ func (h *Handler) AuthenticationUserHandler(c *gin.Context) {
 			60*5,          // maxAge (here 5minutes)
 			"/",           // path
 			"",            // domain
-			false,         // secure WARNING: when add NGINX(https) need to do it 'true'
+			true,          // secure WARNING: when add NGINX(https) need to do it 'true'
 			false,         // httpOnly
 		)
 	} else {

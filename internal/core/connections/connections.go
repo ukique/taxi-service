@@ -36,7 +36,7 @@ func LoadConnections() *Connections {
 	//get APP_PORT from .env
 	appPort := os.Getenv("APP_PORT")
 
-	// create *Conn for database features
+	// create *Conn for database user
 	ctx := context.Background()
 	pool, err := database.CreateConnection(ctx, dataBaseURL)
 	if err != nil {

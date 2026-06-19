@@ -29,7 +29,7 @@ func (u *UserRepository) RegisterUser(ctx context.Context, username, password, e
 	}
 
 	sqlQuery := `
-	INSERT INTO users(username, password, email, created_at)
+	INSERT INTO user(username, password, email, created_at)
 	VALUES ($1, $2, $3, $4);
 `
 	if _, err := u.pool.Exec(ctx, sqlQuery, username, string(hashedPassword), email, time.Now()); err != nil {
@@ -38,16 +38,15 @@ func (u *UserRepository) RegisterUser(ctx context.Context, username, password, e
 	return nil
 }
 
-func (u *UserRepository) GetDataByEmail(ctx context.Context, email string) (models.User, error) {
+func (u *UserRepository) GetDataByUsername(ctx context.Context, username string) (models.User, error) {
 	sqlQuery := `
-	SELECT username, password FROM users WHERE email = $1 
+	SELECT username, password, email FROM users WHERE username = $1;
 `
 	var userData models.User
-	err := u.pool.QueryRow(ctx, sqlQuery, email).Scan(&userData.Username, &userData.Password)
+	err := u.pool.QueryRow(ctx, sqlQuery, username).Scan(&userData.Username, &userData.Password, &userData.Email)
 	if err != nil {
 		return models.User{}, err
 	}
-	userData.Email = email
 	return userData, nil
 }
 
@@ -66,6 +65,9 @@ func (u *UserRepository) SaveRefreshToken(ctx context.Context, token models.Refr
 
 func (u *UserRepository) SearchRefreshToken(ctx context.Context, clientToken string) (models.RefreshToken, error) {
 	sqlQuery := `
+	SELECT username, refresh_token, created_at, expires_at 
+    FROM refresh_tokens 
+    WHERE refresh_token = $1;
 `
 	var refreshToken models.RefreshToken
 	row := u.pool.QueryRow(ctx, sqlQuery, clientToken)

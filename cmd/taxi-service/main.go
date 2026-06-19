@@ -43,7 +43,7 @@ func main() {
 	orderRepository := repository.NewOrderRepository(connection.Pool)
 	orderServices := orderService.NewOrderServices(connection.Pool, driverRepository)
 	orderHandler := orderTransport.NewOrderHandler(connection.Pool, connection.SecretKey, hub, orderRepository, orderServices, connection.Broker)
-	//users
+	//user
 	usersRepository := userRepository.NewUserRepository(connection.Pool)
 	usersService := userService.NewUserService(usersRepository, connection.SecretKey)
 	usersHandler := userTransport.NewUserHandler(connection.Pool, connection.SecretKey, usersRepository, usersService)
@@ -101,7 +101,7 @@ func main() {
 	}))
 	//websocket
 	router.GET("/ws", websocket.WebSocketHandler)
-	//users
+	//user
 	router.POST("/users/register", usersHandler.RegisterUserHandler)
 	router.POST("/users/authentication", usersHandler.AuthenticationUserHandler)
 	router.POST("/refreshToken", usersHandler.RefreshTokenHandler)
