@@ -11,5 +11,5 @@ COPY --from=build /server/service .
 COPY --from=build /go/bin/goose /usr/local/bin/goose
 COPY migrations ./migrations
 COPY ../../entrypoint.sh .
-RUN chmod +x entrypoint.sh
+RUN sed -i 's/\r//' entrypoint.sh && chmod +x entrypoint.sh
 CMD ["./entrypoint.sh"]
