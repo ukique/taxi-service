@@ -1,0 +1,17 @@
+services:
+  metts-db:
+    env_file:
+      - .env.metts
+    image: postgres:17
+    container_name: metts-db
+    ports:
+      - "${METTS_POSTGRES_PORT}:5432"
+    environment:
+      POSTGRES_USER: "${METTS_POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${METTS_POSTGRES_PASSWORD}"
+      POSTGRES_DB: "${METTS_POSTGRES_DB}"
+    volumes:
+      - metts_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  metts_postgres_data:

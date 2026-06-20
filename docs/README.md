@@ -18,3 +18,8 @@ docker compose up --build
 
 ## Message Broker Structure
 #### example of Message Broker Structure you can read [here](https://github.com/ukique/taxi-service/blob/main/docs/examples/message_broker_structure.md)
+
+## Run metts-client
+```
+ docker compose --env-file .env.metts -f docker-compose-metts.yml up    
+```
