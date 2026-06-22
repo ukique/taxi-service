@@ -121,3 +121,7 @@
     width: 100%;
     margin-top: 4rem;
 }
+.auth-error{
+    font-family: "Inter", sans-serif;
+    color: #959598;
+}
