@@ -1,8 +1,8 @@
 import Header from "../../components/header/header.tsx";
-import './home.css'
+import './main.css'
 import {useNavigate} from "react-router-dom";
 
-function Home() {
+function MainPage() {
     const navigate = useNavigate();
     return (
         <>
@@ -22,4 +22,4 @@ function Home() {
     )
 }
 
-export default Home
+export default MainPage
