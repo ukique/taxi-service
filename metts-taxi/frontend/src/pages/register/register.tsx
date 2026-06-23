@@ -11,6 +11,8 @@ function Register() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const handleCreate = async () => {
+        setLoading(true);
+        setError("");
         const data = {
             username,
             email,
@@ -23,8 +25,12 @@ function Register() {
             );
             if (response.status === 201) {
                 navigate("/login");
-            } else{
-                setError(response.data)
+            }
+        } catch (err: any) {
+            if (err.response?.data?.error) {
+                setError(err.response.data.error);
+            } else {
+                setError("Server Error. Try Later");
             }
         } finally {
             setLoading(false);
@@ -50,7 +56,7 @@ function Register() {
                     <h2 className="auth-error">{error}</h2>
                 </div>
                 <div className="auth-btns">
-                    <button onClick={handleCreate} className="create-btn">
+                    <button disabled={loading} onClick={handleCreate} className="create-btn">
                         {loading ? "Creating" : "Create"}</button>
                     <button className="google-btn">
                         <img src="https://www.google.com/favicon.ico" alt="google-logo"/>

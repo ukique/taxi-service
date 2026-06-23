@@ -20,7 +20,7 @@ func (h *Handler) RegisterUserHandler(c *gin.Context) {
 	}
 
 	if err := validation.ParseCredentials(user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
