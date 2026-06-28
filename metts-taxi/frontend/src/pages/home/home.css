@@ -1,0 +1,31 @@
+.home-page{
+    background: linear-gradient(
+            135deg,
+            #000000 0%,
+            #151515 30%,
+            #2a2a2a 50%,
+            #151515 70%,
+            #000000 100%
+    );
+    height: 100vh;
+    width: 100vw;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.home-headline{
+    color: #F0F8FFFF;
+    font-family: "Inter", sans-serif;
+    font-weight: 350;
+    font-size: 3rem;
+    margin-top: 2rem;
+}
+
+@media (min-width: 768px) {
+    .home-headline {
+        margin-top: 4rem;
+        margin-left: 4rem;
+        font-size: 4rem;
+    }
+}
