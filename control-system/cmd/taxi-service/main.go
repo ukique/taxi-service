@@ -7,8 +7,8 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/ukique/taxi-service/internal/core/connections"
-	"github.com/ukique/taxi-service/internal/core/rabbitmq"
-	"github.com/ukique/taxi-service/internal/core/ws"
+	rabbitmq2 "github.com/ukique/taxi-service/internal/core/rabbitmq"
+	ws2 "github.com/ukique/taxi-service/internal/core/ws"
 	driversRepository "github.com/ukique/taxi-service/internal/features/driver/repository"
 	driverTransport "github.com/ukique/taxi-service/internal/features/driver/transport"
 	"github.com/ukique/taxi-service/internal/features/locations/consumer"
@@ -33,7 +33,7 @@ func main() {
 	}()
 
 	//Run Hub for ws connections
-	hub := ws.NewHub()
+	hub := ws2.NewHub()
 	go hub.Run()
 
 	//drivers
@@ -52,9 +52,9 @@ func main() {
 	locationHandler := locationtransport.NewLocationHandler(locationRepository, connection.SecretKey)
 	locationConsumer := consumer.NewLocationConsumer(locationRepository, orderRepository, driverRepository, hub)
 	//ws
-	websocket := ws.NewWSHandler(connection.Pool, hub, orderRepository, driverRepository, locationRepository, connection.SecretKey)
+	websocket := ws2.NewWSHandler(connection.Pool, hub, orderRepository, driverRepository, locationRepository, connection.SecretKey)
 
-	orderCreatedConfig := rabbitmq.QueueConfig{
+	orderCreatedConfig := rabbitmq2.QueueConfig{
 		Name:       "order.created",
 		Durable:    true,
 		AutoDelete: false,
@@ -67,7 +67,7 @@ func main() {
 		log.Println("fail to Declare Queue order.created :", err)
 		os.Exit(1)
 	}
-	orderCoordinatesConfig := rabbitmq.QueueConfig{
+	orderCoordinatesConfig := rabbitmq2.QueueConfig{
 		Name:       "order.coordinates",
 		Durable:    true,
 		AutoDelete: false,
@@ -81,7 +81,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	orderCoordinatesConsumerConfig := rabbitmq.ConsumerConfig{
+	orderCoordinatesConsumerConfig := rabbitmq2.ConsumerConfig{
 		QueueName:   "order.coordinates",
 		ConsumerTag: "",
 		AutoAck:     false,

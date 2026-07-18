@@ -7,7 +7,7 @@ import (
 	"github.com/goccy/go-yaml"
 	"github.com/ukique/taxi-service/config"
 	"github.com/ukique/taxi-service/internal/core/connections"
-	"github.com/ukique/taxi-service/internal/core/rabbitmq"
+	rabbitmq2 "github.com/ukique/taxi-service/internal/core/rabbitmq"
 	"github.com/ukique/taxi-service/internal/features/order"
 	"github.com/ukique/taxi-service/internal/features/order/repository"
 )
@@ -35,7 +35,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	orderCoordinatesQueueConfig := rabbitmq.QueueConfig{
+	orderCoordinatesQueueConfig := rabbitmq2.QueueConfig{
 		Name:       "order.coordinates",
 		Durable:    true,
 		AutoDelete: false,
@@ -48,7 +48,7 @@ func main() {
 		log.Println("fail to Declare Queue order.coordinates :", err)
 		os.Exit(1)
 	}
-	orderCreatedQueueConfig := rabbitmq.QueueConfig{
+	orderCreatedQueueConfig := rabbitmq2.QueueConfig{
 		Name:       "order.created",
 		Durable:    true,
 		AutoDelete: false,
@@ -61,7 +61,7 @@ func main() {
 		log.Println("fail to Declare Queue order.created :", err)
 		os.Exit(1)
 	}
-	orderCreatedConsumerConfig := rabbitmq.ConsumerConfig{
+	orderCreatedConsumerConfig := rabbitmq2.ConsumerConfig{
 		QueueName:   "order.created",
 		ConsumerTag: "",
 		AutoAck:     false,

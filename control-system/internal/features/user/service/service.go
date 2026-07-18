@@ -4,14 +4,14 @@ import (
 	"context"
 	"time"
 
-	"github.com/ukique/taxi-service/control-system/config"
+	"github.com/ukique/taxi-service/config"
 	"github.com/ukique/taxi-service/internal/middleware"
-	"github.com/ukique/taxi-service/internal/models"
+	models2 "github.com/ukique/taxi-service/internal/models"
 )
 
 type UserRepository interface {
-	GetDataByUsername(ctx context.Context, username string) (models.User, error)
-	SearchRefreshToken(ctx context.Context, clientToken string) (models.RefreshToken, error)
+	GetDataByUsername(ctx context.Context, username string) (models2.User, error)
+	SearchRefreshToken(ctx context.Context, clientToken string) (models2.RefreshToken, error)
 }
 
 type UserService struct {

@@ -3,10 +3,10 @@ package repository
 import (
 	"context"
 
-	"github.com/ukique/taxi-service/internal/models"
+	models2 "github.com/ukique/taxi-service/internal/models"
 )
 
-func (d *DriversRepository) GetDriversData(ctx context.Context, pageID int) ([]models.Driver, error) {
+func (d *DriversRepository) GetDriversData(ctx context.Context, pageID int) ([]models2.Driver, error) {
 	sqlQuery := ` 
   SELECT id,username, status FROM drivers
   ORDER BY id DESC 
@@ -14,7 +14,7 @@ func (d *DriversRepository) GetDriversData(ctx context.Context, pageID int) ([]m
 `
 	recordsLimit := 50
 	offest := recordsLimit * (pageID - 1)
-	var drivers []models.Driver
+	var drivers []models2.Driver
 	rows, err := d.pool.Query(ctx, sqlQuery, recordsLimit, offest)
 	if err != nil {
 		return nil, err
@@ -22,7 +22,7 @@ func (d *DriversRepository) GetDriversData(ctx context.Context, pageID int) ([]m
 	defer rows.Close()
 
 	for rows.Next() {
-		var d models.Driver
+		var d models2.Driver
 		if err := rows.Scan(&d.ID, &d.Username, &d.Status); err != nil {
 			return nil, err
 		}
@@ -34,7 +34,7 @@ func (d *DriversRepository) GetDriversData(ctx context.Context, pageID int) ([]m
 	return drivers, nil
 }
 
-func (d *DriversRepository) GetDriversHistory(ctx context.Context, driverID int, pageID int) ([]models.OrderCoordinateEvent, error) {
+func (d *DriversRepository) GetDriversHistory(ctx context.Context, driverID int, pageID int) ([]models2.OrderCoordinateEvent, error) {
 	sqlQuery := `
 	SELECT order_id, driver_id, lat, lon FROM driver_locations
 	WHERE driver_id = $1                                     
@@ -43,7 +43,7 @@ func (d *DriversRepository) GetDriversHistory(ctx context.Context, driverID int,
 `
 	recordsLimit := 50
 	offest := recordsLimit * (pageID - 1)
-	var history []models.OrderCoordinateEvent
+	var history []models2.OrderCoordinateEvent
 	rows, err := d.pool.Query(ctx, sqlQuery, driverID, recordsLimit, offest)
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func (d *DriversRepository) GetDriversHistory(ctx context.Context, driverID int,
 	defer rows.Close()
 
 	for rows.Next() {
-		var h models.OrderCoordinateEvent
+		var h models2.OrderCoordinateEvent
 		if err := rows.Scan(&h.Order.ID, &h.DriverID, &h.Coordinates.Lat, &h.Coordinates.Lon); err != nil {
 			return nil, err
 		}

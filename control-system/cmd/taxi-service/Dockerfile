@@ -10,6 +10,6 @@ FROM alpine:latest
 COPY --from=build /server/service .
 COPY --from=build /go/bin/goose /usr/local/bin/goose
 COPY migrations ./migrations
-COPY ../../entrypoint.sh .
+COPY entrypoint.sh .
 RUN sed -i 's/\r//' entrypoint.sh && chmod +x entrypoint.sh
 CMD ["./entrypoint.sh"]

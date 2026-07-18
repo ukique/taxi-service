@@ -23,6 +23,8 @@ func LoadConnections() *Connections {
 	err := godotenv.Load()
 	if err != nil {
 		log.Println("No .env file, using environment variables")
+	} else {
+		log.Println(".env file loaded successfully")
 	}
 	// get DATABASE_URL from .env
 	dataBaseURL := os.Getenv("DATABASE_URL")

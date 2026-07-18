@@ -7,11 +7,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/ukique/taxi-service/internal/middleware"
-	"github.com/ukique/taxi-service/internal/models"
+	models2 "github.com/ukique/taxi-service/internal/models"
 )
 
 func (h *Handler) AuthenticationUserHandler(c *gin.Context) {
-	var user models.User
+	var user models2.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		log.Println("fail to read JSON:", err)
 		c.JSON(http.StatusBadRequest, gin.H{"message": "data isn't correct"})
@@ -28,7 +28,7 @@ func (h *Handler) AuthenticationUserHandler(c *gin.Context) {
 		}
 		createdAt := time.Now()
 		expireAt := createdAt.Add(time.Minute * 60 * 24 * 7) // 7 days
-		dataBaseRefreshToken := models.RefreshToken{
+		dataBaseRefreshToken := models2.RefreshToken{
 			UserName:     user.Username,
 			RefreshToken: refreshToken,
 			CreatedAt:    createdAt,

@@ -12,7 +12,7 @@ import (
 	"github.com/ukique/taxi-service/internal/core/rabbitmq"
 	"github.com/ukique/taxi-service/internal/features/driver/repository"
 	"github.com/ukique/taxi-service/internal/middleware"
-	"github.com/ukique/taxi-service/internal/models"
+	models2 "github.com/ukique/taxi-service/internal/models"
 )
 
 func (h *Handler) CreateOrderHandler(c *gin.Context) {
@@ -67,7 +67,7 @@ func (h *Handler) CreateOrderHandler(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	ordersBody := models.OutgoingMessage[[]models.Order]{
+	ordersBody := models2.OutgoingMessage[[]models2.Order]{
 		Type: "orders",
 		Data: ordersData,
 	}

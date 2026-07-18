@@ -6,12 +6,12 @@ import (
 	"log"
 
 	amqp "github.com/rabbitmq/amqp091-go"
-	"github.com/ukique/taxi-service/internal/models"
+	models2 "github.com/ukique/taxi-service/internal/models"
 )
 
 func (c *Consumer) OrderLocationConsumer(delivery amqp.Delivery) {
 
-	var eventBody models.OrderCoordinateEvent
+	var eventBody models2.OrderCoordinateEvent
 	if err := json.Unmarshal(delivery.Body, &eventBody); err != nil {
 		log.Println("failed to unmarshal delivery.Body:", err)
 		err := delivery.Nack(false, false)
@@ -34,7 +34,7 @@ func (c *Consumer) OrderLocationConsumer(delivery amqp.Delivery) {
 	}
 
 	// Sending to BroadCast where subscribe_orderDetails
-	messageBody := models.OutgoingMessage[models.OrderCoordinateEvent]{
+	messageBody := models2.OutgoingMessage[models2.OrderCoordinateEvent]{
 		Type: "coordinates",
 		Page: eventBody.Order.ID,
 		Data: eventBody,
@@ -56,7 +56,7 @@ func (c *Consumer) OrderLocationConsumer(delivery amqp.Delivery) {
 		if err != nil {
 			return
 		}
-		ordersBody := models.OutgoingMessage[[]models.Order]{
+		ordersBody := models2.OutgoingMessage[[]models2.Order]{
 			Type: "orders",
 			Data: updOrdersData,
 		}
@@ -94,7 +94,7 @@ func (c *Consumer) OrderLocationConsumer(delivery amqp.Delivery) {
 		if err != nil {
 			return
 		}
-		ordersBody := models.OutgoingMessage[[]models.Order]{
+		ordersBody := models2.OutgoingMessage[[]models2.Order]{
 			Type: "orders",
 			Data: ordersData,
 		}

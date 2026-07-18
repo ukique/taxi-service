@@ -7,19 +7,19 @@ import (
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
-	"github.com/ukique/taxi-service/control-system/config"
-	"github.com/ukique/taxi-service/internal/core/rabbitmq"
+	"github.com/ukique/taxi-service/config"
+	rabbitmq2 "github.com/ukique/taxi-service/internal/core/rabbitmq"
 	locationServices "github.com/ukique/taxi-service/internal/features/locations/service"
-	"github.com/ukique/taxi-service/internal/models"
+	models2 "github.com/ukique/taxi-service/internal/models"
 )
 
 type Consumer struct {
 	simulationData config.Config
-	broker         *rabbitmq.Broker
+	broker         *rabbitmq2.Broker
 	writer         OrdersWriter
 }
 
-func NewOrderConsumer(simulationData config.Config, broker *rabbitmq.Broker, writer OrdersWriter) *Consumer {
+func NewOrderConsumer(simulationData config.Config, broker *rabbitmq2.Broker, writer OrdersWriter) *Consumer {
 	return &Consumer{simulationData: simulationData, broker: broker, writer: writer}
 }
 
@@ -29,14 +29,14 @@ type OrdersWriter interface {
 
 func (c *Consumer) OrderCreatedConsumer(delivery amqp.Delivery) {
 
-	orderCoordinatesPublisherConfig := rabbitmq.PublisherConfig{
+	orderCoordinatesPublisherConfig := rabbitmq2.PublisherConfig{
 		Exchange:  "",
 		Key:       "order.coordinates",
 		Mandatory: false,
 		Immediate: false, // (always false)
 	}
 
-	var order models.Order
+	var order models2.Order
 	if err := json.Unmarshal(delivery.Body, &order); err != nil {
 		log.Println("failed to unmarshal delivery.Body:", err)
 		err := delivery.Nack(false, false)
@@ -52,18 +52,18 @@ func (c *Consumer) OrderCreatedConsumer(delivery amqp.Delivery) {
 		log.Println("database: fail to change order status:", err)
 	}
 
-	var coordinates models.Coordinates
+	var coordinates models2.Coordinates
 	for i := 1; i <= c.simulationData.Simulator.LocationUpdates; i++ {
 
 		coordinates.Lat, coordinates.Lon, _ = locationServices.GenerateCoordinates()
 
-		event := models.OrderCoordinateEvent{
+		event := models2.OrderCoordinateEvent{
 			EventID: i,
-			Coordinates: models.Coordinates{
+			Coordinates: models2.Coordinates{
 				Lat: coordinates.Lat,
 				Lon: coordinates.Lon,
 			},
-			Order: models.Order{
+			Order: models2.Order{
 				DriverID: driverID,
 				ID:       order.ID,
 				Status:   order.Status,

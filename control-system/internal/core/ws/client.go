@@ -8,17 +8,17 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/ukique/taxi-service/internal/models"
+	models2 "github.com/ukique/taxi-service/internal/models"
 )
 
 type OrderRepository interface {
-	GetOrdersData(ctx context.Context, pageID int) ([]models.Order, error)
+	GetOrdersData(ctx context.Context, pageID int) ([]models2.Order, error)
 }
 type DriverRepository interface {
-	GetDriversData(ctx context.Context, pageID int) ([]models.Driver, error)
+	GetDriversData(ctx context.Context, pageID int) ([]models2.Driver, error)
 }
 type LocationRepository interface {
-	GetLastCoordinatesEvent(ctx context.Context, orderID int) (models.OrderCoordinateEvent, error)
+	GetLastCoordinatesEvent(ctx context.Context, orderID int) (models2.OrderCoordinateEvent, error)
 }
 type Client struct {
 	conn               *websocket.Conn
@@ -58,7 +58,7 @@ func (c *Client) ReadPump() {
 		c.conn.Close()
 	}()
 	for {
-		var message models.IncomingMessage
+		var message models2.IncomingMessage
 		err := c.conn.ReadJSON(&message)
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err,
@@ -78,7 +78,7 @@ func (c *Client) ReadPump() {
 				log.Println("failed to get OrdersData:", err)
 				return
 			}
-			ordersBody := models.OutgoingMessage[[]models.Order]{
+			ordersBody := models2.OutgoingMessage[[]models2.Order]{
 				Type: "orders",
 				Data: ordersData,
 			}
@@ -95,7 +95,7 @@ func (c *Client) ReadPump() {
 				log.Println("failed to GetDriversData:", err)
 				return
 			}
-			driversBody := models.OutgoingMessage[[]models.Driver]{
+			driversBody := models2.OutgoingMessage[[]models2.Driver]{
 				Type: "drivers",
 				Data: driverData,
 			}
@@ -114,7 +114,7 @@ func (c *Client) ReadPump() {
 				return
 			}
 
-			eventBody := models.OutgoingMessage[models.OrderCoordinateEvent]{
+			eventBody := models2.OutgoingMessage[models2.OrderCoordinateEvent]{
 				Type: "coordinates",
 				Page: c.subscribedPage,
 				Data: lastEvent,

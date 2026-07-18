@@ -41,7 +41,7 @@ services:
 
   taxi-service:
     build:
-      context: control-system
+      context: .
       dockerfile: cmd/taxi-service/Dockerfile
     env_file:
       - .env
@@ -55,7 +55,7 @@ services:
 
   taxi-simulation:
     build:
-      context: control-system
+      context: .
       dockerfile: cmd/taxi-simulation/Dockerfile
     env_file:
       - .env
@@ -71,8 +71,8 @@ services:
 
   frontend:
     build:
-      context: control-system
-      dockerfile: frontend/Dockerfile
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: taxi-frontend
     ports:
       - "${NGINX_PORT}:80"

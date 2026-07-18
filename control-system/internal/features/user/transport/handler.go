@@ -4,16 +4,16 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/ukique/taxi-service/internal/models"
+	models2 "github.com/ukique/taxi-service/internal/models"
 )
 
 type UserRepository interface {
-	SaveRefreshToken(ctx context.Context, token models.RefreshToken) error
-	SearchRefreshToken(ctx context.Context, clientToken string) (models.RefreshToken, error)
+	SaveRefreshToken(ctx context.Context, token models2.RefreshToken) error
+	SearchRefreshToken(ctx context.Context, clientToken string) (models2.RefreshToken, error)
 	RegisterUser(ctx context.Context, username, password, email string) error
 }
 type UserService interface {
-	VerifyUserCredentials(ctx context.Context, user models.User) bool
+	VerifyUserCredentials(ctx context.Context, user models2.User) bool
 	RefreshTokenService(ctx context.Context, clientToken string) (string, error)
 }
 type Handler struct {

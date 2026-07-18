@@ -7,7 +7,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/ukique/taxi-service/internal/models"
+	models2 "github.com/ukique/taxi-service/internal/models"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -38,19 +38,19 @@ func (u *UserRepository) RegisterUser(ctx context.Context, username, password, e
 	return nil
 }
 
-func (u *UserRepository) GetDataByUsername(ctx context.Context, username string) (models.User, error) {
+func (u *UserRepository) GetDataByUsername(ctx context.Context, username string) (models2.User, error) {
 	sqlQuery := `
 	SELECT username, password, email FROM users WHERE username = $1;
 `
-	var userData models.User
+	var userData models2.User
 	err := u.pool.QueryRow(ctx, sqlQuery, username).Scan(&userData.Username, &userData.Password, &userData.Email)
 	if err != nil {
-		return models.User{}, err
+		return models2.User{}, err
 	}
 	return userData, nil
 }
 
-func (u *UserRepository) SaveRefreshToken(ctx context.Context, token models.RefreshToken) error {
+func (u *UserRepository) SaveRefreshToken(ctx context.Context, token models2.RefreshToken) error {
 	sqlQuery := `
 	INSERT INTO refresh_tokens(username, refresh_token,created_at, expires_at)
 	VALUES ($1,$2,$3,$4);
@@ -63,13 +63,13 @@ func (u *UserRepository) SaveRefreshToken(ctx context.Context, token models.Refr
 	return nil
 }
 
-func (u *UserRepository) SearchRefreshToken(ctx context.Context, clientToken string) (models.RefreshToken, error) {
+func (u *UserRepository) SearchRefreshToken(ctx context.Context, clientToken string) (models2.RefreshToken, error) {
 	sqlQuery := `
 	SELECT username, refresh_token, created_at, expires_at 
     FROM refresh_tokens 
     WHERE refresh_token = $1;
 `
-	var refreshToken models.RefreshToken
+	var refreshToken models2.RefreshToken
 	row := u.pool.QueryRow(ctx, sqlQuery, clientToken)
 	err := row.Scan(&refreshToken.UserName, &refreshToken.RefreshToken, &refreshToken.CreatedAt, &refreshToken.ExpiresAt)
 	if errors.Is(err, pgx.ErrNoRows) {
