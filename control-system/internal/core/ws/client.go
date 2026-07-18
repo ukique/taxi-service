@@ -1,0 +1,150 @@
+package ws
+
+import (
+	"context"
+	"encoding/json"
+	"log"
+	"net/http"
+
+	"github.com/gorilla/websocket"
+	"github.com/jackc/pgx/v5/pgxpool"
+	models2 "github.com/ukique/taxi-service/internal/models"
+)
+
+type OrderRepository interface {
+	GetOrdersData(ctx context.Context, pageID int) ([]models2.Order, error)
+}
+type DriverRepository interface {
+	GetDriversData(ctx context.Context, pageID int) ([]models2.Driver, error)
+}
+type LocationRepository interface {
+	GetLastCoordinatesEvent(ctx context.Context, orderID int) (models2.OrderCoordinateEvent, error)
+}
+type Client struct {
+	conn               *websocket.Conn
+	send               chan []byte
+	hub                *Hub
+	orderRepository    OrderRepository
+	driverRepository   DriverRepository
+	locationRepository LocationRepository
+	subscribeType      string
+	subscribedPage     int
+}
+type Handler struct {
+	pool               *pgxpool.Pool
+	hub                *Hub
+	orderRepository    OrderRepository
+	driverRepository   DriverRepository
+	locationRepository LocationRepository
+	secretKey          string
+}
+
+func NewWSHandler(pool *pgxpool.Pool, hub *Hub, orderRepository OrderRepository, driverRepository DriverRepository, locationRepository LocationRepository,
+	secretKey string) *Handler {
+	return &Handler{pool: pool, hub: hub, orderRepository: orderRepository, driverRepository: driverRepository, locationRepository: locationRepository, secretKey: secretKey}
+}
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024 * 4,
+	WriteBufferSize: 1024 * 32,
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
+
+func (c *Client) ReadPump() {
+	defer func() {
+		c.hub.unregister <- c
+		c.conn.Close()
+	}()
+	for {
+		var message models2.IncomingMessage
+		err := c.conn.ReadJSON(&message)
+		if err != nil {
+			if websocket.IsUnexpectedCloseError(err,
+				websocket.CloseGoingAway,
+				websocket.CloseNormalClosure,
+				websocket.CloseNoStatusReceived,
+			) {
+				log.Println("unexpected ws disconnect:", err)
+			}
+			break
+		}
+		switch message.Type {
+		case "subscribe_orders":
+			c.subscribeType = "orders"
+			ordersData, err := c.orderRepository.GetOrdersData(context.Background(), message.Page)
+			if err != nil {
+				log.Println("failed to get OrdersData:", err)
+				return
+			}
+			ordersBody := models2.OutgoingMessage[[]models2.Order]{
+				Type: "orders",
+				Data: ordersData,
+			}
+			orders, err := json.Marshal(ordersBody)
+			if err != nil {
+				log.Println("failed to Marshal orderBody:", err)
+				return
+			}
+			c.send <- orders
+		case "subscribe_drivers":
+			c.subscribeType = "drivers"
+			driverData, err := c.driverRepository.GetDriversData(context.Background(), message.Page)
+			if err != nil {
+				log.Println("failed to GetDriversData:", err)
+				return
+			}
+			driversBody := models2.OutgoingMessage[[]models2.Driver]{
+				Type: "drivers",
+				Data: driverData,
+			}
+			drivers, err := json.Marshal(driversBody)
+			if err != nil {
+				log.Println("failed to Marshal driversBody:", err)
+				return
+			}
+			c.send <- drivers
+		case "subscribe_orderDetails":
+			c.subscribeType = "coordinates"
+			c.subscribedPage = message.Page //order_ID
+			lastEvent, err := c.locationRepository.GetLastCoordinatesEvent(context.Background(), c.subscribedPage)
+			if err != nil {
+				log.Println("failed to GetLastCoordinatesEvent", err)
+				return
+			}
+
+			eventBody := models2.OutgoingMessage[models2.OrderCoordinateEvent]{
+				Type: "coordinates",
+				Page: c.subscribedPage,
+				Data: lastEvent,
+			}
+
+			event, err := json.Marshal(eventBody)
+			if err != nil {
+				log.Println("failed to Marshal eventBody:", err)
+				return
+			}
+			c.send <- event
+		}
+	}
+}
+
+func (c *Client) WritePump() {
+	defer func() {
+		c.conn.Close()
+	}()
+	for {
+		select {
+		case message, ok := <-c.send:
+			if !ok {
+				if err := c.conn.WriteMessage(websocket.CloseMessage, []byte{}); err != nil {
+					return
+				}
+			}
+			if err := c.conn.WriteMessage(websocket.TextMessage, message); err != nil {
+				return
+			}
+		}
+	}
+}

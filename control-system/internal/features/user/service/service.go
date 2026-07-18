@@ -1,0 +1,42 @@
+package service
+
+import (
+	"context"
+	"time"
+
+	"github.com/ukique/taxi-service/config"
+	"github.com/ukique/taxi-service/internal/middleware"
+	models2 "github.com/ukique/taxi-service/internal/models"
+)
+
+type UserRepository interface {
+	GetDataByUsername(ctx context.Context, username string) (models2.User, error)
+	SearchRefreshToken(ctx context.Context, clientToken string) (models2.RefreshToken, error)
+}
+
+type UserService struct {
+	userRepository UserRepository
+	secretKey      string
+}
+
+func NewUserService(userRepository UserRepository, secretKey string) *UserService {
+	return &UserService{
+		userRepository: userRepository,
+		secretKey:      secretKey}
+}
+
+func (u *UserService) RefreshTokenService(ctx context.Context, clientToken string) (string, error) {
+	refreshToken, err := u.userRepository.SearchRefreshToken(ctx, clientToken)
+	if err != nil {
+		return "", config.ErrInvalidRefreshToken
+	}
+	// checking refresh token expiring
+	if time.Now().After(refreshToken.ExpiresAt) {
+		return "", config.ErrInvalidRefreshToken
+	}
+	accessToken, err := middleware.GenerateJWT(u.secretKey, refreshToken.UserName)
+	if err != nil {
+		return "", err
+	}
+	return accessToken, nil
+}

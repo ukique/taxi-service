@@ -46,5 +46,5 @@ func (h *Handler) LoginHandler(c *gin.Context) {
 		true,
 	)
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, user.Username)
 }

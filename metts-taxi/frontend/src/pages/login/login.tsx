@@ -23,6 +23,7 @@ function LogIn() {
                 data
             );
             if (response.status == 200) {
+                localStorage.setItem("username", response.data)
                 navigate("/home")
             }
         } catch (err: any) {
