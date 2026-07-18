@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/ukique/taxi-service/config"
+	"github.com/ukique/taxi-service/control-system/config"
 )
 
 func (h *Handler) RefreshTokenHandler(c *gin.Context) {

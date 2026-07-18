@@ -7,7 +7,7 @@ import (
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
-	"github.com/ukique/taxi-service/config"
+	"github.com/ukique/taxi-service/control-system/config"
 	"github.com/ukique/taxi-service/internal/core/rabbitmq"
 	locationServices "github.com/ukique/taxi-service/internal/features/locations/service"
 	"github.com/ukique/taxi-service/internal/models"

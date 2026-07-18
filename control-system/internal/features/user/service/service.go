@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/ukique/taxi-service/config"
+	"github.com/ukique/taxi-service/control-system/config"
 	"github.com/ukique/taxi-service/internal/middleware"
 	"github.com/ukique/taxi-service/internal/models"
 )
