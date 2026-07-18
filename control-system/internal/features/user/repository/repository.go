@@ -29,7 +29,7 @@ func (u *UserRepository) RegisterUser(ctx context.Context, username, password, e
 	}
 
 	sqlQuery := `
-	INSERT INTO user(username, password, email, created_at)
+	INSERT INTO users(username, password, email, created_at)
 	VALUES ($1, $2, $3, $4);
 `
 	if _, err := u.pool.Exec(ctx, sqlQuery, username, string(hashedPassword), email, time.Now()); err != nil {
