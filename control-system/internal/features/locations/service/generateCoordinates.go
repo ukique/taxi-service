@@ -10,6 +10,6 @@ import (
 func GenerateCoordinates() (float64, float64, time.Time) {
 	driverLat := rand.Float64()*180 - 90
 	driverLon := rand.Float64()*360 - 180
-	generatedTime := time.Now()
-	return driverLat, driverLon, generatedTime
+	created_at := time.Now()
+	return driverLat, driverLon, created_at
 }

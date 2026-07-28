@@ -55,13 +55,14 @@ func (c *Consumer) OrderCreatedConsumer(delivery amqp.Delivery) {
 	var coordinates models2.Coordinates
 	for i := 1; i <= c.simulationData.Simulator.LocationUpdates; i++ {
 
-		coordinates.Lat, coordinates.Lon, _ = locationServices.GenerateCoordinates()
+		coordinates.Lat, coordinates.Lon, coordinates.CreatedAt = locationServices.GenerateCoordinates()
 
 		event := models2.OrderCoordinateEvent{
 			EventID: i,
 			Coordinates: models2.Coordinates{
-				Lat: coordinates.Lat,
-				Lon: coordinates.Lon,
+				Lat:       coordinates.Lat,
+				Lon:       coordinates.Lon,
+				CreatedAt: coordinates.CreatedAt,
 			},
 			Order: models2.Order{
 				DriverID: driverID,

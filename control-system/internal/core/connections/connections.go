@@ -5,8 +5,10 @@ import (
 	"log"
 	"os"
 
+	"github.com/goccy/go-yaml"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
+	"github.com/ukique/taxi-service/config"
 	"github.com/ukique/taxi-service/internal/core/database"
 	"github.com/ukique/taxi-service/internal/core/rabbitmq"
 )
@@ -16,6 +18,7 @@ type Connections struct {
 	Broker    *rabbitmq.Broker
 	AppPort   string
 	SecretKey string
+	Config    config.Config
 }
 
 func LoadConnections() *Connections {
@@ -51,5 +54,18 @@ func LoadConnections() *Connections {
 		log.Println("failed to create NewBroker:", err)
 	}
 
-	return &Connections{Pool: pool, Broker: broker, SecretKey: secretKey, AppPort: appPort}
+	//Get LoadTesting Simulation Data
+	var configData config.Config
+
+	file, err := os.ReadFile("config/config.yaml")
+	if err != nil {
+		log.Println("failed to load config.yaml:", err)
+		os.Exit(1)
+	}
+	if err := yaml.Unmarshal(file, &configData); err != nil {
+		log.Println("failed to unmarshal simulationData:", err)
+		os.Exit(1)
+	}
+
+	return &Connections{Pool: pool, Broker: broker, SecretKey: secretKey, AppPort: appPort, Config: configData}
 }

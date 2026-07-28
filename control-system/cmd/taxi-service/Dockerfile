@@ -9,6 +9,7 @@ RUN go build -o service ./cmd/taxi-service
 FROM alpine:latest
 COPY --from=build /server/service .
 COPY --from=build /go/bin/goose /usr/local/bin/goose
+COPY --from=build /server/config ./config
 COPY migrations ./migrations
 COPY entrypoint.sh .
 RUN sed -i 's/\r//' entrypoint.sh && chmod +x entrypoint.sh

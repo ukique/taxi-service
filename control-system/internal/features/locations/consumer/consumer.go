@@ -8,23 +8,21 @@ import (
 )
 
 type Consumer struct {
-	hub                transport.Broadcaster
-	locationRepository LocationRepository
-	orderRepository    OrderRepository
-	driverRepository   DriverRepository
+	hub              transport.Broadcaster
+	orderRepository  OrderRepository
+	driverRepository DriverRepository
+	coordinatesChan  chan models.OrderCoordinateEvent
 }
 
-func NewLocationConsumer(locationRepository LocationRepository, orderRepository OrderRepository, driverRepository DriverRepository, hub transport.Broadcaster) *Consumer {
+func NewLocationConsumer(orderRepository OrderRepository, driverRepository DriverRepository, hub transport.Broadcaster, coordinatesChan chan models.OrderCoordinateEvent) *Consumer {
 	return &Consumer{
-		locationRepository: locationRepository,
-		orderRepository:    orderRepository,
-		driverRepository:   driverRepository,
-		hub:                hub}
+		orderRepository:  orderRepository,
+		driverRepository: driverRepository,
+		hub:              hub,
+		coordinatesChan:  coordinatesChan,
+	}
 }
 
-type LocationRepository interface {
-	SaveLocation(ctx context.Context, orderBody models.OrderCoordinateEvent) error
-}
 type OrderRepository interface {
 	UpdateOrder(ctx context.Context, orderID int) error
 	GetDriverIDByOrder(ctx context.Context, orderID int) (int, error)

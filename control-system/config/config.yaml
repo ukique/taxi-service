@@ -1,0 +1,8 @@
+simulator:
+  drivers: 1000 #the num working simultaneously
+  location_updates: 50 #the number of location updates during the fulfillment of one order
+  timeout: 5s #the timeout between location updates
+batch:
+  batch_size: 50 # maximum size of the batch
+  wait_timeout: 500ms # maximum timeout between automatic inserting
+  coordinates_chan_size: 1000 # size of channel that transfer coordinates data to batch
