@@ -12,9 +12,9 @@ type Order struct {
 // OrderCoordinateEvent is a struct for send broker message
 // Example structure you can check in docs/examples/message_broker_structure.md
 type OrderCoordinateEvent struct {
-	EventID int
-	Coordinates
-	Order
+	EventID     int         `json:"event_id"`
+	Coordinates Coordinates `json:"coordinates"`
+	Order       Order       `json:"order"`
 }
 
 // OrderStatus is a ENUM for orderStatus in Orders Table

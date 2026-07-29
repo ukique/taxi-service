@@ -16,7 +16,7 @@ func (r *LocationRepository) SaveLocationBatch(ctx context.Context, events []mod
 
 	for i, e := range events {
 		orderIDs[i] = int64(e.Order.ID)
-		driverIDs[i] = int64(e.DriverID)
+		driverIDs[i] = int64(e.Order.DriverID)
 		lats[i] = e.Coordinates.Lat
 		lons[i] = e.Coordinates.Lon
 		createdAts[i] = e.Coordinates.CreatedAt

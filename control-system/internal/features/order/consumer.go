@@ -56,7 +56,6 @@ func (c *Consumer) OrderCreatedConsumer(delivery amqp.Delivery) {
 	for i := 1; i <= c.simulationData.Simulator.LocationUpdates; i++ {
 
 		coordinates.Lat, coordinates.Lon, coordinates.CreatedAt = locationServices.GenerateCoordinates()
-
 		event := models2.OrderCoordinateEvent{
 			EventID: i,
 			Coordinates: models2.Coordinates{
@@ -73,7 +72,6 @@ func (c *Consumer) OrderCreatedConsumer(delivery amqp.Delivery) {
 		if c.simulationData.Simulator.LocationUpdates == i {
 			event.Order.Status = "done"
 		}
-
 		orderBody, err := json.Marshal(event)
 		if err != nil {
 			log.Println("failed to marshal OrderCoordinatesEvent: ", err)

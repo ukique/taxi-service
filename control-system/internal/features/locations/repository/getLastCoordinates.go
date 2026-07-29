@@ -17,7 +17,7 @@ func (r *LocationRepository) GetLastCoordinatesEvent(ctx context.Context, orderI
 	LIMIT 1;
 `
 	var event models.OrderCoordinateEvent
-	err := r.pool.QueryRow(ctx, sqlQuery, orderID).Scan(&event.ID, &event.Order.ID, &event.DriverID, &event.Coordinates.Lat, &event.Coordinates.Lon, &event.Order.Status)
+	err := r.pool.QueryRow(ctx, sqlQuery, orderID).Scan(&event.EventID, &event.Order.ID, &event.Order.DriverID, &event.Coordinates.Lat, &event.Coordinates.Lon, &event.Order.Status)
 	if err != nil {
 		return models.OrderCoordinateEvent{}, err
 	}
