@@ -16,10 +16,12 @@ docker compose up --build
 3. Open
 [http://localhost](http://localhost)
 
+## Architecture Decision 
+#### docs and bottlenecks you can read [here](https://github.com/ukique/taxi-service/blob/main/control-system/docs/architecture-decisions)
 ## Message Broker Structure
-#### example of Message Broker Structure you can read [here](https://github.com/ukique/taxi-service/blob/main/docs/examples/message_broker_structure.md)
+#### example of Message Broker Structure you can read [here](https://github.com/ukique/taxi-service/blob/main/control-system/docs/examples/message_broker_structure.md)
 
 ## Run metts-client(now in development)
-```
+``` 
  docker compose --env-file .env.metts -f docker-compose-metts.yml up    
 ```
