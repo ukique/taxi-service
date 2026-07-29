@@ -22,24 +22,14 @@ func (c *Consumer) OrderLocationConsumer(delivery amqp.Delivery) {
 		return
 	}
 
-	//Saving to driver_locations table
-	if err := c.locationRepository.SaveLocation(context.Background(), eventBody); err != nil {
-		log.Println("failed to SaveLocation: ", err)
-		err := delivery.Nack(false, true)
-		if err != nil {
-			log.Println("failed to Nack:", err)
-			return
-		}
-		return
-	}
-
+	// Sending to CoordinatesBatch
+	c.coordinatesChan <- eventBody
 	// Sending to BroadCast where subscribe_orderDetails
 	messageBody := models2.OutgoingMessage[models2.OrderCoordinateEvent]{
 		Type: "coordinates",
 		Page: eventBody.Order.ID,
 		Data: eventBody,
 	}
-
 	message, err := json.Marshal(messageBody)
 	if err != nil {
 		log.Println("failed marshal coordinates OutGoingMessage:", err)
@@ -70,7 +60,7 @@ func (c *Consumer) OrderLocationConsumer(delivery amqp.Delivery) {
 	if err := delivery.Ack(false); err != nil {
 		log.Println("failed to send Ack message:", err)
 	}
-	if eventBody.Status == "done" {
+	if eventBody.Order.Status == "done" {
 		//search driverID from DataBase
 		driverID, err := c.orderRepository.GetDriverIDByOrder(context.Background(), eventBody.Order.ID)
 		if err != nil {

@@ -25,9 +25,9 @@ func main() {
 	//Get LoadTesting Simulation Data
 	var simulationData config.Config
 
-	file, err := os.ReadFile("config/simulation.yaml")
+	file, err := os.ReadFile("config/config.yaml")
 	if err != nil {
-		log.Println("failed to load simulation.yaml:", err)
+		log.Println("failed to load config.yaml:", err)
 		os.Exit(1)
 	}
 	if err := yaml.Unmarshal(file, &simulationData); err != nil {

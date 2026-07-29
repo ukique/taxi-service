@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	batch2 "github.com/ukique/taxi-service/internal/core/batch"
 	"github.com/ukique/taxi-service/internal/core/connections"
 	rabbitmq2 "github.com/ukique/taxi-service/internal/core/rabbitmq"
 	ws2 "github.com/ukique/taxi-service/internal/core/ws"
@@ -20,6 +21,7 @@ import (
 	userRepository "github.com/ukique/taxi-service/internal/features/user/repository"
 	userService "github.com/ukique/taxi-service/internal/features/user/service"
 	userTransport "github.com/ukique/taxi-service/internal/features/user/transport"
+	"github.com/ukique/taxi-service/internal/models"
 )
 
 func main() {
@@ -36,6 +38,9 @@ func main() {
 	hub := ws2.NewHub()
 	go hub.Run()
 
+	//Create the coordinate channel for CoordinatesBatch
+	coordinatesChan := make(chan models.OrderCoordinateEvent, connection.Config.Batch.CoordinatesChanSize)
+
 	//drivers
 	driverRepository := driversRepository.NewDriversRepository(connection.Pool)
 	driverHandler := driverTransport.NewDriverHandler(connection.SecretKey, hub, driverRepository)
@@ -50,7 +55,9 @@ func main() {
 	//locations
 	locationRepository := locationrepository.NewLocationRepository(connection.Pool)
 	locationHandler := locationtransport.NewLocationHandler(locationRepository, connection.SecretKey)
-	locationConsumer := consumer.NewLocationConsumer(locationRepository, orderRepository, driverRepository, hub)
+	locationConsumer := consumer.NewLocationConsumer(orderRepository, driverRepository, hub, coordinatesChan)
+	//batch
+	batch := batch2.NewBatch(connection.Config.Batch.BatchSize, connection.Config.Batch.WaitTimeout, coordinatesChan, locationRepository)
 	//ws
 	websocket := ws2.NewWSHandler(connection.Pool, hub, orderRepository, driverRepository, locationRepository, connection.SecretKey)
 
@@ -80,7 +87,19 @@ func main() {
 		log.Println("fail to Declare Queue order.coordinates :", err)
 		os.Exit(1)
 	}
-
+	coordinatesBatchConfig := rabbitmq2.QueueConfig{
+		Name:       "coordinates.batch",
+		Durable:    true,
+		AutoDelete: false,
+		Exclusive:  false,
+		NoWait:     false,
+		Args:       nil,
+	}
+	_, err = connection.Broker.DeclareQueue(coordinatesBatchConfig)
+	if err != nil {
+		log.Println("failed to Declare Queue coordinates.batch :", err)
+		os.Exit(1)
+	}
 	orderCoordinatesConsumerConfig := rabbitmq2.ConsumerConfig{
 		QueueName:   "order.coordinates",
 		ConsumerTag: "",
@@ -90,7 +109,21 @@ func main() {
 		NoWait:      false,
 		Args:        nil,
 	}
+	coordinatesBatchConsumerConfig := rabbitmq2.ConsumerConfig{
+		QueueName:   "coordinates.batch",
+		ConsumerTag: "",
+		AutoAck:     false,
+		Exclusive:   false,
+		NoLocal:     false, //always false
+		NoWait:      false,
+		Args:        nil,
+	}
+	//Batch
+	go batch.CoordinatesBatch()
+
 	go connection.Broker.Consumer(orderCoordinatesConsumerConfig, locationConsumer.OrderLocationConsumer)
+	go connection.Broker.Consumer(coordinatesBatchConsumerConfig, locationConsumer.CoordinatesBatchConsumer)
+
 	//GIN setup
 	router := gin.Default()
 	router.Use(cors.New(cors.Config{

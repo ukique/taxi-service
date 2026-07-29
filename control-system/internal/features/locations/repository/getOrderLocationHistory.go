@@ -21,7 +21,7 @@ func (r *LocationRepository) GetOrderLocationHistory(ctx context.Context, orderI
 
 	for rows.Next() {
 		var e models.OrderCoordinateEvent
-		if err := rows.Scan(&e.Order.ID, &e.DriverID, &e.Coordinates.Lat, &e.Coordinates.Lon, &e.Order.Status); err != nil {
+		if err := rows.Scan(&e.Order.ID, &e.Order.DriverID, &e.Coordinates.Lat, &e.Coordinates.Lon, &e.Order.Status); err != nil {
 			return []models.OrderCoordinateEvent{}, err
 		}
 		events = append(events, e)

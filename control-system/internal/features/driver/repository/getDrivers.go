@@ -52,7 +52,7 @@ func (d *DriversRepository) GetDriversHistory(ctx context.Context, driverID int,
 
 	for rows.Next() {
 		var h models2.OrderCoordinateEvent
-		if err := rows.Scan(&h.Order.ID, &h.DriverID, &h.Coordinates.Lat, &h.Coordinates.Lon); err != nil {
+		if err := rows.Scan(&h.Order.ID, &h.Order.DriverID, &h.Coordinates.Lat, &h.Coordinates.Lon); err != nil {
 			return nil, err
 		}
 		history = append(history, h)
