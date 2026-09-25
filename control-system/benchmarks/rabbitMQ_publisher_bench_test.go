@@ -36,17 +36,29 @@ func BenchmarkProduce_OrderCreated(b *testing.B) {
 	if err != nil {
 		b.Fatalf("dial error: %v", err)
 	}
-	defer conn.Close()
+	b.Cleanup(func() {
+		conn.Close()
+	})
+
 	ch, err := conn.Channel()
 	if err != nil {
 		b.Fatalf("channel error: %v", err)
 	}
-	defer ch.Close()
+	b.Cleanup(func() {
+		ch.Close()
+	})
 
-	_, err = ch.QueueDeclare("order.created", true, false, false, false, nil)
+	_, err = ch.QueueDeclare("order.created.test", true, false, false, false, nil)
 	if err != nil {
 		b.Fatalf("queue declare failed: %v", err)
 	}
+
+	b.Cleanup(func() {
+		_, err := ch.QueuePurge("order.created.test", false)
+		if err != nil {
+			b.Logf("failed to purge message from order.created.test: %v", err)
+		}
+	})
 
 	b.ResetTimer()
 	b.ReportAllocs()
@@ -61,7 +73,7 @@ func BenchmarkProduce_OrderCreated(b *testing.B) {
 		}
 		config := rabbitmq.PublisherConfig{
 			Exchange:  "",
-			Key:       "order.created",
+			Key:       "order.created.test",
 			Mandatory: false,
 			Immediate: false, // (always false)
 			Message:   message,
@@ -91,17 +103,30 @@ func BenchmarkProduce_OrderCoordinates(b *testing.B) {
 	if err != nil {
 		b.Fatalf("dial error: %v", err)
 	}
-	defer conn.Close()
+	b.Cleanup(func() {
+		conn.Close()
+	})
+
 	ch, err := conn.Channel()
 	if err != nil {
 		b.Fatalf("channel error: %v", err)
 	}
-	defer ch.Close()
+	b.Cleanup(func() {
+		ch.Close()
+	})
 
-	_, err = ch.QueueDeclare("order.coordinates", true, false, false, false, nil)
+	_, err = ch.QueueDeclare("order.coordinates.test", true, false, false, false, nil)
 	if err != nil {
 		b.Fatalf("queue declare failed: %v", err)
 	}
+
+	b.Cleanup(func() {
+		_, err := ch.QueuePurge("order.coordinates.test", false)
+		if err != nil {
+			b.Logf("failed to purge message from order.coordinates.test: %v", err)
+		}
+	})
+
 	b.ResetTimer()
 	b.ReportAllocs()
 
@@ -116,7 +141,7 @@ func BenchmarkProduce_OrderCoordinates(b *testing.B) {
 
 		config := rabbitmq.PublisherConfig{
 			Exchange:  "",
-			Key:       "order.coordinates",
+			Key:       "order.coordinates.test",
 			Mandatory: false,
 			Immediate: false, // (always false)
 			Message:   message,
@@ -145,17 +170,29 @@ func BenchmarkProduce_CoordinatesBatch(b *testing.B) {
 	if err != nil {
 		b.Fatalf("dial error: %v", err)
 	}
-	defer conn.Close()
+	b.Cleanup(func() {
+		conn.Close()
+	})
+
 	ch, err := conn.Channel()
 	if err != nil {
 		b.Fatalf("channel error: %v", err)
 	}
-	defer ch.Close()
+	b.Cleanup(func() {
+		ch.Close()
+	})
 
-	_, err = ch.QueueDeclare("coordinates.batch", true, false, false, false, nil)
+	_, err = ch.QueueDeclare("coordinates.batch.test", true, false, false, false, nil)
 	if err != nil {
 		b.Fatalf("queue declare failed: %v", err)
 	}
+
+	b.Cleanup(func() {
+		_, err := ch.QueuePurge("coordinates.batch.test", false)
+		if err != nil {
+			b.Logf("failed to purge message from coordinates.batch.test: %v", err)
+		}
+	})
 
 	b.ResetTimer()
 	b.ReportAllocs()
@@ -170,7 +207,7 @@ func BenchmarkProduce_CoordinatesBatch(b *testing.B) {
 
 		config := rabbitmq.PublisherConfig{
 			Exchange:  "",
-			Key:       "coordinates.batch",
+			Key:       "coordinates.batch.test",
 			Mandatory: false,
 			Immediate: false, // (always false)
 			Message:   message,
