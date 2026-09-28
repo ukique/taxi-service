@@ -11,7 +11,6 @@ import (
 
 func (h *Handler) RefreshTokenHandler(c *gin.Context) {
 	clientToken, err := c.Cookie("refreshToken")
-	log.Println("refreshToken:", clientToken)
 	if err != nil {
 		log.Println("failed to get clientRefreshToken: ", err)
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "you aren't authorized!"})
