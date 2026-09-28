@@ -52,6 +52,9 @@ services:
         condition: service_healthy
       broker:
         condition: service_healthy
+    environment:
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@broker:5672
+      DATABASE_URL: "${DATABASE_DOCKER_URL}"
 
   taxi-simulation:
     build:
@@ -59,6 +62,8 @@ services:
       dockerfile: cmd/taxi-simulation/Dockerfile
     env_file:
       - .env
+    environment:
+      RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@broker:5672
     container_name: taxi-simulation-app
     restart: unless-stopped
     depends_on:
@@ -73,6 +78,9 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        VITE_API: /api
+
     container_name: taxi-frontend
     ports:
       - "${NGINX_PORT}:80"
@@ -80,6 +88,7 @@ services:
     depends_on:
       taxi-service:
         condition: service_started
+
 
 volumes:
   postgres_data:

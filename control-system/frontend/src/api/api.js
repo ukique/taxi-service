@@ -1,4 +1,7 @@
-const API = "/api"
-const WS = `ws://${window.location.host}`;
+const API = import.meta.env.VITE_API;
+const WS = import.meta.env.VITE_WS_URL;
 
-export { API, WS }
+//console.log("API:", API);
+//console.log("WS:", WS);
+
+export { API, WS };
