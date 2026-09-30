@@ -6,6 +6,7 @@ import Header from "../../../components/header/header.jsx";
 import {useEffect, useState} from "react";
 import {refreshAccessToken} from "../../../api/authApi.js";
 import {API} from "../../../api/api.js";
+import js from "@eslint/js";
 
 function OrderDetailsLocation() {
     const [data, setData] = useState([]);
@@ -50,9 +51,9 @@ function OrderDetailsLocation() {
                     <table>
                         <thead>
                         <tr>
+                            <th>Event ID</th>
                             <th>Driver ID</th>
                             <th>Order ID</th>
-                            <th>Order Status</th>
                             <th>Lat</th>
                             <th>Lon</th>
                         </tr>
@@ -60,19 +61,18 @@ function OrderDetailsLocation() {
                         <tbody>
                         {loading || data.length === 0 ? (
                             <tr>
-                                <td colSpan={5}
-                                    style={{textAlign: "center", padding: "2rem", color: "#888"}}>
+                                <td colSpan={5} style={{ textAlign: "center", padding: "2rem", color: "#888" }}>
                                     {loading ? "Loading location history..." : "No location data found for this order"}
                                 </td>
                             </tr>
                         ) : (
                             data.map((entry, index) => (
                                 <tr key={index}>
-                                    <td>{entry.driver_id}</td>
-                                    <td>{entry.id}</td>
-                                    <td>{entry.status}</td>
-                                    <td>{entry.lat}</td>
-                                    <td>{entry.lon}</td>
+                                    <td>{entry.event_id}</td>
+                                    <td>{entry.order?.driver_id}</td>
+                                    <td>{entry.order?.id}</td>
+                                    <td>{entry.coordinates?.lat}</td>
+                                    <td>{entry.coordinates?.lon}</td>
                                 </tr>
                             ))
                         )}
