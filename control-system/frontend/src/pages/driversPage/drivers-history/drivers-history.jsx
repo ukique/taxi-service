@@ -48,7 +48,6 @@ function DriversHistory() {
                     <tr>
                         <th>Driver ID</th>
                         <th>Order ID</th>
-                        <th>Order Status</th>
                         <th>Lat</th>
                         <th>Lon</th>
                     </tr>
@@ -62,12 +61,11 @@ function DriversHistory() {
                         </tr>
                     ) : (
                         data.map((entry, index) => (
-                            <tr key={index}>
-                                <td>{entry.DriverID}</td>
-                                <td>{entry.id}</td>
-                                <td>{entry.status || "—"}</td>
-                                <td>{entry.lat}</td>
-                                <td>{entry.lon}</td>
+                            <tr key={entry.event_id || index}>
+                                <td>{entry.order?.driver_id ?? "—"}</td>
+                                <td>{entry.order?.id ?? "—"}</td>
+                                <td>{entry.coordinates?.lat ?? "—"}</td>
+                                <td>{entry.coordinates?.lon ?? "—"}</td>
                             </tr>
                         ))
                     )}

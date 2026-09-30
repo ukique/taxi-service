@@ -14,7 +14,7 @@ function OrderDetailsInfo() {
             setCoordinates(data.data);
         }
     }, []);
-
+    console.log(coordinates)
     useSubscription({
         subscribeMsg: {type: "subscribe_orderDetails", page: Number(id)},
         onMessage: handleMessage,
@@ -29,11 +29,11 @@ function OrderDetailsInfo() {
                     <h1 id="current-location-info">Current Location</h1>
                     <div className="current-location-data">
                         <h1>Lat: </h1>
-                        <h2>{coordinates ? coordinates.lat : "—"}</h2>
+                        <h2>{coordinates?.coordinates?.lat ?? "—"}</h2>
                     </div>
                     <div className="current-location-data">
                         <h1>Lon: </h1>
-                        <h2>{coordinates ? coordinates.lon : "—"}</h2>
+                        <h2>{coordinates?.coordinates?.lon ?? "—"}</h2>
                     </div>
                 </div>
                 <div className="order-details-data">
@@ -50,9 +50,9 @@ function OrderDetailsInfo() {
                             <tbody>
                             {coordinates ? (
                                 <tr>
-                                    <td>{coordinates.driver_id}</td>
-                                    <td>{coordinates.id}</td>
-                                    <td>{coordinates.status || "—"}</td>
+                                    <td>{coordinates.order?.driver_id ?? "—"}</td>
+                                    <td>{coordinates.order?.id ?? "—"}</td>
+                                    <td>{coordinates.order?.status ?? "—"}</td>
                                 </tr>
                             ) : (
                                 <tr>
