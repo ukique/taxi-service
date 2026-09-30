@@ -8,10 +8,11 @@ import (
 
 func (r *LocationRepository) GetOrderLocationHistory(ctx context.Context, orderID int) ([]models.OrderCoordinateEvent, error) {
 	sqlQuery := `
-	SELECT l.order_id, l.driver_id, l.lat, l.lon, o.status
+	SELECT l.event_id, l.order_id, l.driver_id, l.lat, l.lon, o.status
 	FROM driver_locations l
 	JOIN orders	o ON o.id = l.order_id
-	WHERE order_id = $1;
+	WHERE order_id = $1
+	ORDER BY l.event_id;
 `
 	var events []models.OrderCoordinateEvent
 	rows, err := r.pool.Query(ctx, sqlQuery, orderID)
@@ -21,7 +22,7 @@ func (r *LocationRepository) GetOrderLocationHistory(ctx context.Context, orderI
 
 	for rows.Next() {
 		var e models.OrderCoordinateEvent
-		if err := rows.Scan(&e.Order.ID, &e.Order.DriverID, &e.Coordinates.Lat, &e.Coordinates.Lon, &e.Order.Status); err != nil {
+		if err := rows.Scan(&e.EventID, &e.Order.ID, &e.Order.DriverID, &e.Coordinates.Lat, &e.Coordinates.Lon, &e.Order.Status); err != nil {
 			return []models.OrderCoordinateEvent{}, err
 		}
 		events = append(events, e)
